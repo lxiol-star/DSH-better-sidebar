@@ -189,17 +189,6 @@ export function EditorHost(props: {
   )
   // The editor path bar's default spelling (absolute vs cwd-relative): a bare
   // boolean snapshot, so flipping the setting re-renders this tab only.
-  // Absolute-by-default: an older Host/store snapshot can predate this pref
-  // (the field is simply absent), which must not flip the path bar back to
-  // relative. Only an explicit false selects the relative spelling.
-  const pathAbsolute = useSyncExternalStore(
-    useCallback((callback: () => void) => store.subscribe(callback), [store]),
-    useCallback(() => store.getSnapshot().prefs.editorPathAbsolute !== false, [store]),
-  )
-  // The DSH-native "open with" capability (host open-in-app): one adapter per
-  // window, shared by every row menu below. The plugin no longer owns a
-  // target list, a URL vocabulary or a spawn route — the host reports which
-  // applications are actually installed for THIS path.
   const openInApp = useMemo(() => createOpenInApp(ctx), [ctx])
   // The plugin's own service (native-tab opens, "open to the side"): absent in
   // stripped-down hosts, where every flow degrades to the bottom workbench.
@@ -592,7 +581,7 @@ export function EditorHost(props: {
   return (
     <div className={css.editor}>
       <div className={css.editorHeader}>
-        <EditorPathInput key={`${path}:${pathAbsolute ? 'abs' : 'rel'}`} path={path} cwd={scope.cwd} absolute={pathAbsolute} onOpen={openFile} />
+        <EditorPathInput key={path} path={path} cwd={scope.cwd} onOpen={openFile} />
         {toolbar?.modes === true && (
           <div className={css.editorModeToggle}>
             <button
@@ -738,9 +727,12 @@ export function EditorHost(props: {
  * per-path dedupe tab); Escape/blur restores the current value. The parent
  * keys it by `path` so an in-place switch remounts and reseeds the draft.
  */
-function EditorPathInput(props: { path: string; cwd: string | undefined; absolute: boolean; onOpen: (path: string) => void }) {
-  const { path, cwd, absolute, onOpen } = props
-  const display = path === '' ? '' : absolute === false ? relativeTo(cwd ?? '', path) : path
+function EditorPathInput(props: { path: string; cwd: string | undefined; onOpen: (path: string) => void }) {
+  const { path, cwd, onOpen } = props
+  // This fork always shows the absolute path: relative spellings were
+  // ambiguous across worktrees and a stale prefs snapshot could silently
+  // flip back to relative after a hot update.
+  const display = path
   const [value, setValue] = useState(display)
 
   const commit = (): void => {

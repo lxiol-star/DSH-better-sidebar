@@ -1,6 +1,6 @@
 # dsh-better-sidebar
 
-> **This repository is a personal fork of `omdsh-dev/DSH-better-sidebar` 0.28.0.** The only behavioral addition is a setting: the editor file address bar defaults to the **absolute path** (Settings → Sidebar → General → "Absolute paths in the editor address bar", on by default). Upstream: [omdsh-dev/DSH-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar).
+> **This repository is a personal fork of `omdsh-dev/DSH-better-sidebar` 0.28.0.** The editor file address bar now always shows the **full absolute path** (no toggle). Upstream: [omdsh-dev/DSH-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar).
 
 
 

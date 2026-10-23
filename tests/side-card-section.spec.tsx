@@ -99,7 +99,7 @@ describe('SideCardSection declarative inventory', () => {
     expect(pressedCount(html, 'false')).toBe(0)
     // The custom switches are real checkboxes: the absolute-path default and
     // the two mobile adaptations are on by default; agentOpenTools is not.
-    expect(html.match(/checked=""/g)?.length ?? 0).toBe(3)
+    expect(html.match(/checked=""/g)?.length ?? 0).toBe(2)
     expect(html).not.toContain('Auto-open Subagents')
   })
 
@@ -122,7 +122,7 @@ describe('SideCardSection declarative inventory', () => {
     expect(html).toContain('Default the Tasks page to the tree')
     // Both are ON by default; disarming one shows up as an unchecked box.
     expect(html).toContain('checked=""')
-    store.setPrefs({ ...store.getPrefs(), mobileNoAutoOpen: false, mobileDefaultTree: false, editorPathAbsolute: false })
+    store.setPrefs({ ...store.getPrefs(), mobileNoAutoOpen: false, mobileDefaultTree: false })
     const off = renderSection(store, service)
     expect(off).toContain('>Mobile</div>')
     expect(off).not.toContain('checked=""')
@@ -171,7 +171,7 @@ describe('SideCardSection declarative inventory', () => {
     // The explorer card stays pressed.
     expect(pressedCount(html, 'true')).toBe(1)
     // The absolute-path default and both mobile adaptations are on by default.
-    expect(html.match(/checked=""/g)?.length ?? 0).toBe(3)
+    expect(html.match(/checked=""/g)?.length ?? 0).toBe(2)
   })
 
   it('hides the gear of a disabled feature (its related settings are dormant)', () => {
@@ -195,10 +195,10 @@ describe('SideCardSection declarative inventory', () => {
     // Four general-row switches remain (agentOpenTools off by default, the
     // absolute-path default on, plus the two mobile adaptations on) — the
     // removed scheme row was a dropdown.
-    expect(html.match(/type="checkbox"/g)?.length).toBe(4)
+    expect(html.match(/type="checkbox"/g)?.length).toBe(3)
     // The absolute-path default and both mobile adaptations are on by default
     // (agentOpenTools is not).
-    expect(html.match(/checked=""/g)?.length ?? 0).toBe(3)
+    expect(html.match(/checked=""/g)?.length ?? 0).toBe(2)
     // The escape hatch is always reachable: no gear, no scheme gate — the
     // only gear left on the page is the Subagents card's own.
     expect(html).not.toContain('Custom CSS Feature settings')
