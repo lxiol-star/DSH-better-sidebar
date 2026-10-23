@@ -1,6 +1,6 @@
 # dsh-better-sidebar
 
-> **本仓库是 `omdsh-dev/DSH-better-sidebar` 0.28.0 的个人 fork**，编辑器文件地址栏固定显示**完整绝对路径**（本 fork 的默认行为，无开关）。安装地址见本 README 的“安装”小节；上游仓库：[omdsh-dev/DSH-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar)。
+> **本仓库是 `omdsh-dev/DSH-better-sidebar` 0.28.0 的个人 fork**，编辑器文件地址栏默认显示**完整绝对路径**（设置 → 侧边栏 → 常规 可关闭，关闭后显示相对会话 cwd 的路径）。安装地址见本 README 的“安装”小节；上游仓库：[omdsh-dev/DSH-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar)。
 
 
 
