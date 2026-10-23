@@ -18,7 +18,7 @@ Or the CLI:
 dsh plugin --profile desktop add "github:lxiol-star/DSH-better-sidebar#v0.28.1-lx.1"
 ```
 
-A prebuilt `dsh-better-sidebar-0.28.1-lx.1.tgz` is attached to this fork's Releases (install via Settings → Plugins → Add plugin). The GitHub source builds `lib/` through `prepare` (needs network and Node 20+). Fully quit and reopen DSH after installing.
+A prebuilt `dsh-better-sidebar-0.28.1-lx.1.tgz` is attached to this fork's Releases (install via Settings → Plugins → Add plugin). The built `lib/` is committed in this fork, so the GitHub source install needs no build script. Fully quit and reopen DSH after installing.
 
 <div align="center">
   <b style="font-size: 1.15em;">A dual workbench for DSH: native right sidebar + self-drawn bottom panel, with the <code>ctx.betterSidebar</code> service open to every plugin</b><br /><br />

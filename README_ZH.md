@@ -18,7 +18,7 @@ github:lxiol-star/DSH-better-sidebar#v0.28.1-lx.1
 dsh plugin --profile desktop add "github:lxiol-star/DSH-better-sidebar#v0.28.1-lx.1"
 ```
 
-也可以从 Releases 下载 `dsh-better-sidebar-0.28.1-lx.1.tgz`，在 设置 → 插件 → 添加插件 里安装；GitHub 源会通过 `prepare` 自动构建 `lib/`（需要网络与 Node 20+）。安装后完全退出并重开 DSH。
+也可以从 Releases 下载 `dsh-better-sidebar-0.28.1-lx.1.tgz`，在 设置 → 插件 → 添加插件 里安装。本 fork 已把构建后的 `lib/` 一并提交，GitHub 源安装无需再跑构建脚本。安装后完全退出并重开 DSH。
 
 <div align="center">
   <b style="font-size: 1.15em;">DSH 的双工作台：原生右侧栏 + 自绘底部面板，并把 <code>ctx.betterSidebar</code> 服务开放给所有插件</b><br /><br />
