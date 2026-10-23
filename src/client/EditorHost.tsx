@@ -189,9 +189,12 @@ export function EditorHost(props: {
   )
   // The editor path bar's default spelling (absolute vs cwd-relative): a bare
   // boolean snapshot, so flipping the setting re-renders this tab only.
+  // Absolute-by-default: an older Host/store snapshot can predate this pref
+  // (the field is simply absent), which must not flip the path bar back to
+  // relative. Only an explicit false selects the relative spelling.
   const pathAbsolute = useSyncExternalStore(
     useCallback((callback: () => void) => store.subscribe(callback), [store]),
-    useCallback(() => store.getSnapshot().prefs.editorPathAbsolute, [store]),
+    useCallback(() => store.getSnapshot().prefs.editorPathAbsolute !== false, [store]),
   )
   // The DSH-native "open with" capability (host open-in-app): one adapter per
   // window, shared by every row menu below. The plugin no longer owns a
@@ -737,7 +740,7 @@ export function EditorHost(props: {
  */
 function EditorPathInput(props: { path: string; cwd: string | undefined; absolute: boolean; onOpen: (path: string) => void }) {
   const { path, cwd, absolute, onOpen } = props
-  const display = path === '' ? '' : absolute ? path : relativeTo(cwd ?? '', path)
+  const display = path === '' ? '' : absolute === false ? relativeTo(cwd ?? '', path) : path
   const [value, setValue] = useState(display)
 
   const commit = (): void => {

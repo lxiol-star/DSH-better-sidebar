@@ -901,7 +901,7 @@ export function SideCardSection({ store, service }: SideCardSectionProps) {
           </span>
           <Switch
             label={t('settingsEditorPathAbsoluteTitle')}
-            checked={prefs.editorPathAbsolute}
+            checked={prefs.editorPathAbsolute !== false}
             onChange={(next) => { applyPref({ editorPathAbsolute: next }) }}
           />
         </div>
