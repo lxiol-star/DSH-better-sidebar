@@ -643,4 +643,6 @@ export const ja: Record<string, string> = {
   pluginTurnOutlineDesc: "セッションをユーザーターン（入力＋ツール手順＋出力）ごとに折りたたみ、任意のステップをクリックすると会話の該当箇所へワンクリックでジャンプ。LLM 呼び出しなし・読み取り専用",
   pluginDshMemoryDeltaName: 'dsh-memory-delta メモリ',
   pluginDshMemoryDeltaDesc: 'セッションをまたぐ記憶：変化した部分だけを注入し（変化がなければ何も注入しません）、レビュー期日のリマインド、関連度順の検索、サイドバーのタブを備えます。',
+  settingsEditorPathAbsoluteTitle: 'Absolute paths in the editor address bar',
+  settingsEditorPathAbsoluteDesc: 'On: the file address bar shows the full absolute path by default. Off: it shows the session-cwd-relative path. Either spelling can still be typed to open a file',
 }

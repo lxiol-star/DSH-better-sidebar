@@ -1,5 +1,25 @@
 # dsh-better-sidebar
 
+> **本仓库是 `omdsh-dev/DSH-better-sidebar` 0.28.0 的个人 fork**，相对上游只加了一个设置：编辑器文件地址栏默认显示**绝对路径**（设置 → 侧边栏 → 常规 → 编辑器地址栏默认显示绝对路径，默认开启）。安装地址见本 README 的“安装”小节；上游仓库：[omdsh-dev/DSH-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar)。
+
+
+
+## 安装本 fork
+
+插件管理器（GitHub）：
+
+```text
+github:lxiol-star/DSH-better-sidebar#v0.28.1-lx.1
+```
+
+或 CLI：
+
+```sh
+dsh plugin --profile desktop add "github:lxiol-star/DSH-better-sidebar#v0.28.1-lx.1"
+```
+
+也可以从 Releases 下载 `dsh-better-sidebar-0.28.1-lx.1.tgz`，在 设置 → 插件 → 添加插件 里安装；GitHub 源会通过 `prepare` 自动构建 `lib/`（需要网络与 Node 20+）。安装后完全退出并重开 DSH。
+
 <div align="center">
   <b style="font-size: 1.15em;">DSH 的双工作台：原生右侧栏 + 自绘底部面板，并把 <code>ctx.betterSidebar</code> 服务开放给所有插件</b><br /><br />
   <a href="https://www.npmjs.com/package/dsh-better-sidebar"><img alt="npm version" src="https://img.shields.io/npm/v/dsh-better-sidebar" /></a>

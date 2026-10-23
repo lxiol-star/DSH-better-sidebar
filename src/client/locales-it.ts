@@ -634,4 +634,6 @@ export const it: Record<string, string> = {
   pluginTurnOutlineDesc: "Ripiega la sessione in turni utente (input + passaggi strumento + output); clic su un passaggio per tornare al punto esatto della conversazione — nessuna chiamata LLM, sola lettura",
   pluginDshMemoryDeltaName: 'dsh-memory-delta Memoria',
   pluginDshMemoryDeltaDesc: 'Memoria tra sessioni: inietta solo ciò che è cambiato (nulla se nulla è cambiato), con promemoria di revisione, ricerca per rilevanza e scheda laterale.',
+  settingsEditorPathAbsoluteTitle: 'Absolute paths in the editor address bar',
+  settingsEditorPathAbsoluteDesc: 'On: the file address bar shows the full absolute path by default. Off: it shows the session-cwd-relative path. Either spelling can still be typed to open a file',
 }

@@ -643,4 +643,6 @@ export const hi: Record<string, string> = {
   pluginTurnOutlineDesc: "सत्र को उपयोगकर्ता टर्न (इनपुट + टूल चरण + आउटपुट) में मोड़ें; किसी भी चरण पर क्लिक करें और बातचीत के सटीक स्थान पर जाएँ — कोई LLM कॉल नहीं, केवल पढ़ना",
   pluginDshMemoryDeltaName: 'dsh-memory-delta स्मृति',
   pluginDshMemoryDeltaDesc: 'सत्रों के बीच स्मृति: केवल बदला हुआ भाग इंजेक्ट होता है (कुछ न बदले तो कुछ नहीं), समीक्षा-तिथि अनुस्मारक, प्रासंगिकता-क्रमित खोज और साइडबार टैब के साथ।',
+  settingsEditorPathAbsoluteTitle: 'Absolute paths in the editor address bar',
+  settingsEditorPathAbsoluteDesc: 'On: the file address bar shows the full absolute path by default. Off: it shows the session-cwd-relative path. Either spelling can still be typed to open a file',
 }

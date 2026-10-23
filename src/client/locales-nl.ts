@@ -641,4 +641,6 @@ export const nl: Record<string, string> = {
   pluginTurnOutlineDesc: "Vouwt de sessie op in gebruikersbeurten (invoer + toolstappen + uitvoer); klik op een stap om terug te springen naar de exacte plek in het gesprek — zonder LLM-aanroepen, alleen-lezen",
   pluginDshMemoryDeltaName: 'dsh-memory-delta Geheugen',
   pluginDshMemoryDeltaDesc: 'Geheugen tussen sessies: alleen wat is gewijzigd wordt geïnjecteerd (niets als er niets is gewijzigd), met herinnering aan de controledatum, relevantiegerangschikt zoeken en een zijbalktabblad.',
+  settingsEditorPathAbsoluteTitle: 'Absolute paths in the editor address bar',
+  settingsEditorPathAbsoluteDesc: 'On: the file address bar shows the full absolute path by default. Off: it shows the session-cwd-relative path. Either spelling can still be typed to open a file',
 }

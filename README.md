@@ -1,5 +1,25 @@
 # dsh-better-sidebar
 
+> **This repository is a personal fork of `omdsh-dev/DSH-better-sidebar` 0.28.0.** The only behavioral addition is a setting: the editor file address bar defaults to the **absolute path** (Settings → Sidebar → General → "Absolute paths in the editor address bar", on by default). Upstream: [omdsh-dev/DSH-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar).
+
+
+
+## Install this fork
+
+Plugin manager (GitHub):
+
+```text
+github:lxiol-star/DSH-better-sidebar#v0.28.1-lx.1
+```
+
+Or the CLI:
+
+```sh
+dsh plugin --profile desktop add "github:lxiol-star/DSH-better-sidebar#v0.28.1-lx.1"
+```
+
+A prebuilt `dsh-better-sidebar-0.28.1-lx.1.tgz` is attached to this fork's Releases (install via Settings → Plugins → Add plugin). The GitHub source builds `lib/` through `prepare` (needs network and Node 20+). Fully quit and reopen DSH after installing.
+
 <div align="center">
   <b style="font-size: 1.15em;">A dual workbench for DSH: native right sidebar + self-drawn bottom panel, with the <code>ctx.betterSidebar</code> service open to every plugin</b><br /><br />
   <a href="https://www.npmjs.com/package/dsh-better-sidebar"><img alt="npm version" src="https://img.shields.io/npm/v/dsh-better-sidebar" /></a>

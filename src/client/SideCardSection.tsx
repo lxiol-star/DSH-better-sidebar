@@ -894,6 +894,17 @@ export function SideCardSection({ store, service }: SideCardSectionProps) {
             onChange={(next) => { applyPref({ agentOpenTools: next }) }}
           />
         </div>
+        <div className={css.row}>
+          <span className={css.rowText}>
+            <span className={css.title}>{t('settingsEditorPathAbsoluteTitle')}</span>
+            <span className={css.desc}>{t('settingsEditorPathAbsoluteDesc')}</span>
+          </span>
+          <Switch
+            label={t('settingsEditorPathAbsoluteTitle')}
+            checked={prefs.editorPathAbsolute}
+            onChange={(next) => { applyPref({ editorPathAbsolute: next }) }}
+          />
+        </div>
       </div>
 
       {/* 自定义 CSS: the user-space escape hatch. The retired "位置兼容模式"

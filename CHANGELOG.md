@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.28.1-lx.1
+
+- 新增「编辑器地址栏默认显示绝对路径」：默认开启，文件地址栏显示完整绝对路径（多 worktree/同名目录下更容易分辨）；可在 设置 → 侧边栏 → 常规 关闭，关闭后沿用原来的“相对会话 cwd”显示。地址栏仍同时接受相对与绝对路径输入。
+- 本仓库是从 omdsh-dev/DSH-better-sidebar 0.28.0 fork 的个人构建，后续同步上游改动。
+
 > 本文档收录 dsh-better-sidebar 的完整发布历史（最新版摘要见 [README](README_ZH.md)；同步发布于 [GitHub Releases](https://github.com/omdsh-dev/DSH-better-sidebar/releases)）。
 
 ### v0.28.0

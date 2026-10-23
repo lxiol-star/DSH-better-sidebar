@@ -629,4 +629,6 @@ export const de: Record<string, string> = {
   pluginTurnOutlineDesc: "Faltet die Sitzung in Benutzerrunden (Eingabe + Tool-Schritte + Ausgabe); Klick auf einen Schritt springt an die genaue Stelle im Gespräch — ohne LLM, nur lesend",
   pluginDshMemoryDeltaName: 'dsh-memory-delta Gedächtnis',
   pluginDshMemoryDeltaDesc: 'Sitzungsübergreifendes Gedächtnis: nur Änderungen werden injiziert (nichts, wenn sich nichts geändert hat), mit Erinnerung an den Prüftermin, Relevanz-Suche und Sidebar-Tab.',
+  settingsEditorPathAbsoluteTitle: 'Absolute paths in the editor address bar',
+  settingsEditorPathAbsoluteDesc: 'On: the file address bar shows the full absolute path by default. Off: it shows the session-cwd-relative path. Either spelling can still be typed to open a file',
 }

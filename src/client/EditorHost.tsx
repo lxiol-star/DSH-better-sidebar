@@ -187,6 +187,12 @@ export function EditorHost(props: {
     useCallback((callback: () => void) => store.subscribe(callback), [store]),
     useCallback(() => store.getSnapshot().prefs.explorerExclude, [store]),
   )
+  // The editor path bar's default spelling (absolute vs cwd-relative): a bare
+  // boolean snapshot, so flipping the setting re-renders this tab only.
+  const pathAbsolute = useSyncExternalStore(
+    useCallback((callback: () => void) => store.subscribe(callback), [store]),
+    useCallback(() => store.getSnapshot().prefs.editorPathAbsolute, [store]),
+  )
   // The DSH-native "open with" capability (host open-in-app): one adapter per
   // window, shared by every row menu below. The plugin no longer owns a
   // target list, a URL vocabulary or a spawn route — the host reports which
@@ -583,7 +589,7 @@ export function EditorHost(props: {
   return (
     <div className={css.editor}>
       <div className={css.editorHeader}>
-        <EditorPathInput key={path} path={path} cwd={scope.cwd} onOpen={openFile} />
+        <EditorPathInput key={`${path}:${pathAbsolute ? 'abs' : 'rel'}`} path={path} cwd={scope.cwd} absolute={pathAbsolute} onOpen={openFile} />
         {toolbar?.modes === true && (
           <div className={css.editorModeToggle}>
             <button
@@ -721,16 +727,17 @@ export function EditorHost(props: {
 }
 
 /**
- * The header's path input: shows the current file relative to the session
- * cwd (absolute when outside it). Enter resolves the typed path (relative
+ * The header's path input: shows the current file's absolute path when
+ * `editorPathAbsolute` is on, otherwise its session-cwd-relative spelling
+ * (relativeTo already falls back to absolute when outside the cwd). Enter resolves the typed path (relative
  * input joins onto the cwd — the same resolution `openSidebarFile` uses)
  * and opens it through the parent's mode-aware open (in-place switch or a
  * per-path dedupe tab); Escape/blur restores the current value. The parent
  * keys it by `path` so an in-place switch remounts and reseeds the draft.
  */
-function EditorPathInput(props: { path: string; cwd: string | undefined; onOpen: (path: string) => void }) {
-  const { path, cwd, onOpen } = props
-  const display = path === '' ? '' : relativeTo(cwd ?? '', path)
+function EditorPathInput(props: { path: string; cwd: string | undefined; absolute: boolean; onOpen: (path: string) => void }) {
+  const { path, cwd, absolute, onOpen } = props
+  const display = path === '' ? '' : absolute ? path : relativeTo(cwd ?? '', path)
   const [value, setValue] = useState(display)
 
   const commit = (): void => {

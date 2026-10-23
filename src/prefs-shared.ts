@@ -71,6 +71,14 @@ export interface SidebarPrefs {
    */
   editorGitGutter: boolean
   /**
+   * Whether the editor header's path input shows the file's ABSOLUTE path by
+   * default (on) instead of the session-cwd-relative spelling (off). Both
+   * spellings remain accepted when typed: the input joins relative values onto
+   * the cwd and opens absolute ones as-is. On by default so a branch/worktree
+   * file is unambiguous at a glance.
+   */
+  editorPathAbsolute: boolean
+  /**
    * VS Code `files.exclude`-style glob patterns (the editor card's gear
    * popup manages the list): matched entries are REMOVED from the file tree
    * and the name search entirely — dot-prefixed rows otherwise render
@@ -148,6 +156,9 @@ export const SIDEBAR_PREFS_DEFAULTS: SidebarPrefs = {
   agentOpenTools: false,
   editorExplorer: false,
   editorGitGutter: true,
+  // Absolute editor paths by default: branch/worktree files are otherwise
+  // ambiguous when several checkouts share the same relative tree.
+  editorPathAbsolute: true,
   explorerExclude: [...EXPLORER_EXCLUDE_DEFAULTS],
   customCss: '',
   htmlViewerNoSandbox: false,

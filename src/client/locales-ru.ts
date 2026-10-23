@@ -641,4 +641,6 @@ export const ru: Record<string, string> = {
   pluginTurnOutlineDesc: "Сворачивает сессию в раунды пользователя (ввод + шаги инструментов + вывод); клик по любому шагу возвращает к точному месту в диалоге — без вызовов LLM, только чтение",
   pluginDshMemoryDeltaName: 'dsh-memory-delta Память',
   pluginDshMemoryDeltaDesc: 'Память между сессиями: внедряется только то, что изменилось (ничего, если ничего не менялось), с напоминанием о дате проверки, поиском по релевантности и вкладкой в боковой панели.',
+  settingsEditorPathAbsoluteTitle: 'Absolute paths in the editor address bar',
+  settingsEditorPathAbsoluteDesc: 'On: the file address bar shows the full absolute path by default. Off: it shows the session-cwd-relative path. Either spelling can still be typed to open a file',
 }

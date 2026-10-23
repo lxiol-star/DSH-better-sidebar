@@ -708,7 +708,7 @@ export interface BetterSidebarService {
   closeTab(tabId: string, scope?: SessionScope): void
   /** Subscribe to registry changes (register/dispose). */
   subscribe(listener: () => void): () => void
-  /** The plugin version this service instance was built from ('0.12.0'). */
+  /** The plugin version this service instance was built from ('0.28.1-lx.1'). */
   readonly version: string
   /**
    * Monotonic capability list (v0.12.0+): 'badge' | 'tabLifecycle' |
@@ -819,7 +819,7 @@ export function matchUrlTarget(tabs: readonly TabDescriptor[], url: URL): TabDes
  * The plugin version this service instance reports. Keep in lockstep with
  * `package.json`'s version — `tests/service.spec.ts` asserts the pair.
  */
-export const SIDEBAR_SERVICE_VERSION = '0.28.0'
+export const SIDEBAR_SERVICE_VERSION = '0.28.1-lx.1'
 
 /**
  * Monotonic capability list consumers use to gate new API usage (features

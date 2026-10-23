@@ -658,4 +658,6 @@ export const zhMO: Record<string, string> = {
   pluginTurnOutlineDesc: "把會話按用戶輪次摺疊成「輸入 + 工具步驟 + 輸出」摘要，點擊任意步驟一鍵跳回對話原位；零 LLM 調用、唯讀",
   pluginDshMemoryDeltaName: 'dsh-memory-delta 記憶',
   pluginDshMemoryDeltaDesc: '跨工作階段記憶：只注入有變動的部分（沒有變動則完全不注入），附到期覆核提醒、相關度排序檢索與側邊欄分頁。',
+  settingsEditorPathAbsoluteTitle: '編輯器位址列預設顯示絕對路徑',
+  settingsEditorPathAbsoluteDesc: '開啟後檔案位址列預設顯示完整絕對路徑；關閉則顯示相對於工作階段工作區的路徑。位址列仍可輸入相對或絕對路徑開啟檔案',
 }

@@ -641,4 +641,6 @@ export const id: Record<string, string> = {
   pluginTurnOutlineDesc: "Melipat sesi menjadi giliran pengguna (input + langkah alat + output); klik langkah mana pun untuk melompat ke posisi persisnya dalam percakapan — tanpa panggilan LLM, hanya baca",
   pluginDshMemoryDeltaName: 'dsh-memory-delta Memori',
   pluginDshMemoryDeltaDesc: 'Memori antar sesi: hanya yang berubah yang disuntikkan (tidak ada saat tidak ada perubahan), dengan pengingat tanggal tinjauan, pencarian berperingkat relevansi, dan tab bilah samping.',
+  settingsEditorPathAbsoluteTitle: 'Absolute paths in the editor address bar',
+  settingsEditorPathAbsoluteDesc: 'On: the file address bar shows the full absolute path by default. Off: it shows the session-cwd-relative path. Either spelling can still be typed to open a file',
 }
