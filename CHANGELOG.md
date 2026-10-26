@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.28.1-lx.7
+
+- 路径输入框改为「草稿态」：显示值始终由当前 path/cwd/模式推导，只有用户正在输入时才使用 draft。之前输入框把首次渲染时的 display 存进 `useState`，cwd 晚一帧到达（或 scope 先给出空 cwd）时就永久卡在相对路径。
+- cwd 兜底把空字符串也视为缺失（`scope.cwd === ''` 不再挡住会话 summary 的 cwd）。
+- 相对 `tab.path` 且能解析 cwd 时强制用绝对显示：相对路径在路径栏没有合法意义，偏好开关只控制绝对 tab.path 的显示方式。
+- 引用/原生打开与已存在的旧标签页均适用，无需关闭重开。
+
 ## 0.28.1-lx.6
 
 - 修复引用/原生标签页的 scope 没有 `cwd`：这类 tab 由 `openSidebarFile` 以只含 `sessionId` 的 scope 打开，路径栏拿不到 cwd，lx.5 的解析因此退回原相对值。现在路径栏在 scope.cwd 缺失时从当前会话 summary 取 cwd，再解析绝对路径；`openSidebarFile` 也把 cwd 一并传下去，新标签页直接带完整 scope。

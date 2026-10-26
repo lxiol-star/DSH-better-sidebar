@@ -40,7 +40,7 @@ import { updatePluginSettings } from './plugin-settings.ts'
 import { createOpenInApp } from './open-in-app.ts'
 import { TreePanel } from './TreePanel.tsx'
 import { t } from './locales.ts'
-import { editorPathDisplay, relativeTo } from './paths.ts'
+import { editorPathDisplay, isAbsolutePath, relativeTo } from './paths.ts'
 import { resolveSidebarPath } from './paths.ts'
 import { clearRetargetedPath, closePathTabs, consumeRetargetedPath, pathTabKey, retargetPathTabs } from './tree-mutations.ts'
 import type { EditorToolbarControls, EditorToolbarState, FileViewerDescriptor } from './service.ts'
@@ -139,8 +139,9 @@ export function EditorHost(props: {
   // that has only sessionId (the open() helper passes no cwd). Recover the
   // session cwd so the path bar can resolve the tab's relative path instead of
   // printing it raw; the tree/viewer paths keep their existing scope.
-  const sessionCwd = scope.cwd
-    ?? ctx.sessions?.list?.getSnapshot().byId[scope.sessionId]?.cwd
+  const sessionCwd = scope.cwd !== undefined && scope.cwd !== ''
+    ? scope.cwd
+    : ctx.sessions?.list?.getSnapshot().byId[scope.sessionId]?.cwd
   const [load, setLoad] = useState<EditorLoad>({ status: 'loading' })
   // Manual refresh (issue #167): bumping the sequence re-runs the load effect
   // with the same path/scope — the only reload entry besides open/close.
@@ -198,10 +199,14 @@ export function EditorHost(props: {
   // Reactive absolute/relative switch; only an explicit false selects the
   // relative spelling, so a store snapshot that predates the field still
   // defaults to absolute.
-  const pathAbsolute = useSyncExternalStore(
+  const pathPreference = useSyncExternalStore(
     useCallback((callback: () => void) => store.subscribe(callback), [store]),
     useCallback(() => store.getSnapshot().prefs.editorPathAbsolute !== false, [store]),
   )
+  // A relative tab.path is never a legitimate spelling here: the bar would
+  // just echo a native-resource address. Force the absolute form whenever the
+  // cwd lets us resolve it; the preference still controls absolute tab paths.
+  const pathAbsolute = pathPreference || (sessionCwd !== undefined && sessionCwd !== '' && !isAbsolutePath(path))
   const openInApp = useMemo(() => createOpenInApp(ctx), [ctx])
   // The plugin's own service (native-tab opens, "open to the side"): absent in
   // stripped-down hosts, where every flow degrades to the bottom workbench.
@@ -743,19 +748,24 @@ export function EditorHost(props: {
 function EditorPathInput(props: { path: string; cwd: string | undefined; absolute: boolean; onOpen: (path: string) => void }) {
   const { path, cwd, absolute, onOpen } = props
   const display = editorPathDisplay(cwd, path, absolute)
-  const [value, setValue] = useState(display)
+  // The cwd (and therefore display) can arrive one render after the tab is
+  // mounted. Keep a draft only while the user edits, so an external display
+  // change (late cwd, mode switch) is reflected instead of being frozen in
+  // the initial useState seed.
+  const [draft, setDraft] = useState<string | null>(null)
+  const value = draft ?? display
 
   const commit = (): void => {
     const input = value.trim()
     if (input === '' || input === display) {
-      setValue(display)
+      setDraft(null)
       return
     }
     onOpen(resolveSidebarPath(cwd, input))
     // Split mode: the open lands in a NEW/deduped editor tab — THIS tab's
     // path stays, so the input falls back to its own display value. (Merged
     // mode remounts this input on the new path; the reset is harmless.)
-    setValue(display)
+    setDraft(null)
   }
 
   return (
@@ -765,16 +775,16 @@ function EditorPathInput(props: { path: string; cwd: string | undefined; absolut
       placeholder={t('editorPathPlaceholder')}
       title={editorPathDisplay(cwd, path, true)}
       spellCheck={false}
-      onChange={(event) => { setValue(event.target.value) }}
+      onChange={(event) => { setDraft(event.target.value) }}
       onKeyDown={(event) => {
         if (event.key === 'Enter') {
           event.preventDefault()
           commit()
         } else if (event.key === 'Escape') {
-          setValue(display)
+          setDraft(null)
         }
       }}
-      onBlur={() => { setValue(display) }}
+      onBlur={() => { setDraft(null) }}
     />
   )
 }
