@@ -40,7 +40,7 @@ import { updatePluginSettings } from './plugin-settings.ts'
 import { createOpenInApp } from './open-in-app.ts'
 import { TreePanel } from './TreePanel.tsx'
 import { t } from './locales.ts'
-import { relativeTo } from './paths.ts'
+import { editorPathDisplay, relativeTo } from './paths.ts'
 import { resolveSidebarPath } from './paths.ts'
 import { clearRetargetedPath, closePathTabs, consumeRetargetedPath, pathTabKey, retargetPathTabs } from './tree-mutations.ts'
 import type { EditorToolbarControls, EditorToolbarState, FileViewerDescriptor } from './service.ts'
@@ -736,7 +736,7 @@ export function EditorHost(props: {
  */
 function EditorPathInput(props: { path: string; cwd: string | undefined; absolute: boolean; onOpen: (path: string) => void }) {
   const { path, cwd, absolute, onOpen } = props
-  const display = path === '' ? '' : absolute === false ? relativeTo(cwd ?? '', path) : path
+  const display = editorPathDisplay(cwd, path, absolute)
   const [value, setValue] = useState(display)
 
   const commit = (): void => {
@@ -757,7 +757,7 @@ function EditorPathInput(props: { path: string; cwd: string | undefined; absolut
       className={css.editorPathInput}
       value={value}
       placeholder={t('editorPathPlaceholder')}
-      title={path}
+      title={editorPathDisplay(cwd, path, true)}
       spellCheck={false}
       onChange={(event) => { setValue(event.target.value) }}
       onKeyDown={(event) => {

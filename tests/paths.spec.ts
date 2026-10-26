@@ -1,7 +1,7 @@
 import './browser-globals.ts'
 import { describe, expect, it } from 'vitest'
 import { decodeHtmlUrl } from '../src/html-route.ts'
-import { isAbsolutePath, relativeTo, workspaceRelativePath } from '../src/client/paths.ts'
+import { editorPathDisplay, isAbsolutePath, relativeTo, workspaceRelativePath } from '../src/client/paths.ts'
 import { resolveSidebarPath } from '../src/client/paths.ts'
 import { downloadUrl, htmlUrl, mediaUrl } from '../src/client/api.ts'
 
@@ -136,5 +136,20 @@ describe('workspaceRelativePath', () => {
     ['C:/Work', 'D:/Work/a.ts'],
   ])('refuses an unavailable root or unsafe projection %j / %s', (root, path) => {
     expect(workspaceRelativePath(root, path)).toBeUndefined()
+  })
+})
+
+describe('editorPathDisplay', () => {
+  it('resolves a session-relative tab path before printing it', () => {
+    expect(editorPathDisplay('/Users/me/code', 'reports/a.md', true)).toBe('/Users/me/code/reports/a.md')
+    expect(editorPathDisplay('/Users/me/code', 'reports/a.md', false)).toBe('reports/a.md')
+  })
+  it('leaves absolute paths alone and keeps outside-cwd paths absolute in relative mode', () => {
+    expect(editorPathDisplay('/Users/me/code', '/Users/me/code/src/a.ts', true)).toBe('/Users/me/code/src/a.ts')
+    expect(editorPathDisplay('/Users/me/code', '/Users/other/a.ts', false)).toBe('/Users/other/a.ts')
+  })
+  it('handles path-less tabs and unknown cwd', () => {
+    expect(editorPathDisplay(undefined, '', true)).toBe('')
+    expect(editorPathDisplay(undefined, 'reports/a.md', true)).toBe('reports/a.md')
   })
 })

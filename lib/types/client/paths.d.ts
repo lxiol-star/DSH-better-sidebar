@@ -50,6 +50,20 @@ export declare function workspaceRelativePath(root: string | undefined, path: st
  */
 export declare function isWithinWorkspace(base: string, target: string): boolean;
 /**
+ * The editor path bar's display value for one tab file.
+ *
+ * A tab can carry a session-relative path (reference opens / native hosts
+ * sometimes hand the editor a relative address), so absolute mode must resolve
+ * it against the session cwd instead of printing the raw tab path. Relative
+ * mode resolves first too, so the relative spelling is computed from the real
+ * target (and falls back to absolute outside the cwd, like {@link relativeTo}).
+ * @param cwd - the session working directory, when known.
+ * @param path - the tab's path, absolute or session-relative.
+ * @param absolute - whether the address bar shows absolute paths.
+ * @returns the value to seed the path input with (`''` for a path-less tab).
+ */
+export declare function editorPathDisplay(cwd: string | undefined, path: string, absolute: boolean): string;
+/**
  * The last path segment of a '/'- or '\'-separated path (a diff tab title,
  * a worktree label). Returns the whole string when no separator is present.
  */
