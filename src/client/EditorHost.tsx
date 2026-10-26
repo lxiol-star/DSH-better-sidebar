@@ -135,6 +135,12 @@ export function EditorHost(props: {
   // as its path. It renders the file tree rooted at that folder instead of
   // the viewer loading flow (a directory is not a file).
   const isDir = metaOf(tab).dir === true
+  // Reference/native opens can carry a session-relative tab.path with a scope
+  // that has only sessionId (the open() helper passes no cwd). Recover the
+  // session cwd so the path bar can resolve the tab's relative path instead of
+  // printing it raw; the tree/viewer paths keep their existing scope.
+  const sessionCwd = scope.cwd
+    ?? ctx.sessions?.list?.getSnapshot().byId[scope.sessionId]?.cwd
   const [load, setLoad] = useState<EditorLoad>({ status: 'loading' })
   // Manual refresh (issue #167): bumping the sequence re-runs the load effect
   // with the same path/scope — the only reload entry besides open/close.
@@ -588,7 +594,7 @@ export function EditorHost(props: {
   return (
     <div className={css.editor}>
       <div className={css.editorHeader}>
-        <EditorPathInput key={`${path}:${pathAbsolute ? 'abs' : 'rel'}`} path={path} cwd={scope.cwd} absolute={pathAbsolute} onOpen={openFile} />
+        <EditorPathInput key={`${path}:${pathAbsolute ? 'abs' : 'rel'}`} path={path} cwd={sessionCwd} absolute={pathAbsolute} onOpen={openFile} />
         {toolbar?.modes === true && (
           <div className={css.editorModeToggle}>
             <button

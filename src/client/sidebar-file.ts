@@ -143,5 +143,5 @@ export function openSidebarFile(ctx: Context, sessionId: string, path: string, l
     path: absolute,
     id: `editor:${absolute}`,
     ...(line === undefined ? {} : { line }),
-  })
+  }, { sessionId, cwd: summary?.cwd })
 }
