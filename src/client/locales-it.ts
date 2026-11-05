@@ -46,6 +46,7 @@ export const it: Record<string, string> = {
   editorTreeToggle: 'Pannello dell’albero dei file',
   editorPathPlaceholder: 'Percorso del file (relativo alla directory della sessione o assoluto), Invio per aprire',
   editorSearchPlaceholder: 'Cerca file per nome…',
+  editorLocateCurrent: 'Individua il file corrente',
   editorSearchNoResults: 'Nessun file corrispondente',
   editorSearchTruncated: 'Troppi risultati — viene mostrato un elenco parziale',
   editorEmptyHint: 'Scelga un file dal pannello dell’albero a destra o dal campo del percorso in alto per iniziare l’anteprima',

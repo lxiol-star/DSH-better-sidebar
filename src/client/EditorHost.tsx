@@ -41,10 +41,10 @@ import { createOpenInApp } from './open-in-app.ts'
 import { TreePanel } from './TreePanel.tsx'
 import { t } from './locales.ts'
 import { relativeTo } from './paths.ts'
-import { resolveSidebarPath } from './paths.ts'
+import { explorerRevealPath, resolveSidebarPath } from './paths.ts'
 import { clearRetargetedPath, closePathTabs, consumeRetargetedPath, pathTabKey, retargetPathTabs } from './tree-mutations.ts'
 import type { EditorToolbarControls, EditorToolbarState, FileViewerDescriptor } from './service.ts'
-import { firstLeaf, insertLeafAt, leafWithTab, mintTabId, type SidebarStore, type SidebarTab } from './state.ts'
+import { firstLeaf, insertLeafAt, leafWithTab, mintTabId, revealPaths, type SidebarState, type SidebarStore, type SidebarTab } from './state.ts'
 import css from './sidebar.module.css'
 
 type EditorLoad =
@@ -539,6 +539,33 @@ export function EditorHost(props: {
   const treeOpen = treeOpenOf(tab)
   /** Persist the panel flag on the tab (survives reloads with the layout). */
   const toggleTree = (): void => { patchMeta(ctx, tab, scope.sessionId, { treeOpen: !treeOpen }) }
+
+  /**
+   * The tree panel's locate button: bring the file THIS window is showing into
+   * view. The reveal is a state write (`revealPaths` expands the ancestors and
+   * records the highlight); the tree body scrolls itself to the highlighted row
+   * afterwards, so expanding alone is not enough.
+   *
+   * The target comes from `explorerRevealPath`: normalized (the path bar stores
+   * what the user typed — `./a.ts` never matches a row as-is) and only when it
+   * lies under this tree's root (a foreign path highlights nothing and would
+   * persist `expanded` entries no level matches). No target → no button, since
+   * a locate that can only no-op is worse than no affordance.
+   *
+   * A repeat click must scroll again: `revealPaths` hands back a FRESH array
+   * even when the set is unchanged, and the scroll effect keys on that identity.
+   * The active session goes through `reduce` (it notifies); a parked panel's
+   * session takes `reduceFor`, which deliberately does not notify — it paints on
+   * its next activation.
+   */
+  const locateTarget = isDir ? undefined : explorerRevealPath(scope.cwd, path)
+  const revealActive = (): void => {
+    if (locateTarget === undefined) return
+    const apply = (state: SidebarState): SidebarState => revealPaths(state, scope.cwd, [locateTarget])
+    if (store.getSnapshot().sessionId === scope.sessionId) store.reduce(apply)
+    else store.reduceFor(scope.sessionId, apply)
+  }
+
   const saveLabel = toolbar === null ? ''
     : toolbar.saveState === 'saving' ? t('loading')
       : toolbar.saveState === 'saved' ? t('saved')
@@ -711,6 +738,7 @@ export function EditorHost(props: {
               onPathRenamed={onPathRenamed}
               onPathDeleted={onPathDeleted}
               exclude={exclude}
+              onRevealActive={locateTarget === undefined ? undefined : revealActive}
               service={ctx.get('betterSidebar')}
             />
           </div>

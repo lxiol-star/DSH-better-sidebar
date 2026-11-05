@@ -38,6 +38,7 @@ export const sv: Record<string, string> = {
   editorTreeToggle: 'Filträdspanel',
   editorPathPlaceholder: 'Filsökväg (relativ sessionskatalogen eller absolut), Enter för att öppna',
   editorSearchPlaceholder: 'Sök filer efter namn…',
+  editorLocateCurrent: 'Hitta aktuell fil',
   editorSearchNoResults: 'Inga matchande filer',
   editorSearchTruncated: 'För många resultat — visar en delvis lista',
   editorEmptyHint: 'Välj en fil från trädpanelen eller sökvägsinmatningen ovan för att börja förhandsgranska',

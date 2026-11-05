@@ -27,7 +27,7 @@ import type { BetterSidebarService } from './service.ts'
 import { ancestorDirs } from './state.ts'
 import { FileTree } from './FileTree.tsx'
 import { DEFAULT_FILE_TREE_SORT, type FileTreeSort } from './file-tree-sort.ts'
-import { IconUploadOutline16 } from './icons.tsx'
+import { IconLocateOutline16, IconUploadOutline16 } from './icons.tsx'
 import type { OpenInApp } from './open-in-app.ts'
 import type { OpenWithTarget } from './open-with.ts'
 import { t } from './locales.ts'
@@ -92,6 +92,11 @@ export function TreePanel(props: {
   /** Full-window presentation: the panel fills its host instead of docking
    *  at a fixed width. */
   full?: boolean
+  /** Reveal the file its host is currently showing (the search row's locate
+   *  button): expand the ancestors, highlight the row and scroll the tree
+   *  body to it. Absent → no locate button (the standalone explorer has no
+   *  "current file", and a folder window has no viewer). */
+  onRevealActive?: () => void
   /** The sidebar registry service (file-icon registrations; passed through to FileTree). */
   service?: BetterSidebarService
 }) {
@@ -99,7 +104,7 @@ export function TreePanel(props: {
     sessionId, cwd, expanded, revealed, onToggle, onOpenFile, onOpenFileNewTab, onOpenFileSide,
     openInApp, openWithTargets, openWithPinned, openWithSsh, onOpenWith, onToggleOpenWithPin,
     openWithShowPluginTargets, exclude,
-    onReferenceFile, onPathRenamed, onPathDeleted, visible, full, service,
+    onReferenceFile, onPathRenamed, onPathDeleted, visible, full, service, onRevealActive,
   } = props
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<{ matches: string[]; dirs: string[]; truncated: boolean } | null>(null)
@@ -255,6 +260,19 @@ export function TreePanel(props: {
           spellCheck={false}
           onChange={(event) => { setQuery(event.target.value) }}
         />
+        {onRevealActive !== undefined && (
+          <IconButton
+            label={t('editorLocateCurrent')}
+            icon={<IconLocateOutline16 size={14} />}
+            onClick={() => {
+              // The reveal only scrolls the TREE body, and that body is parked
+              // behind the results panel while a query is active — drop the
+              // query first so the target row is mounted when the scroll runs.
+              if (query !== '') setQuery('')
+              onRevealActive()
+            }}
+          />
+        )}
         <IconButton
           label={t('refresh')}
           icon={<IconRefreshOutlineRegular size={14} />}

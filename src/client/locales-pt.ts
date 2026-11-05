@@ -38,6 +38,7 @@ export const pt: Record<string, string> = {
   editorTreeToggle: 'Painel da árvore de arquivos',
   editorPathPlaceholder: 'Caminho do arquivo (relativo ao diretório da sessão ou absoluto), Enter para abrir',
   editorSearchPlaceholder: 'Pesquisar arquivos por nome…',
+  editorLocateCurrent: 'Localizar o arquivo atual',
   editorSearchNoResults: 'Nenhum arquivo correspondente',
   editorSearchTruncated: 'Resultados demais — exibindo lista parcial',
   editorEmptyHint: 'Escolha um arquivo na árvore do painel ou no campo de caminho acima para começar a pré-visualizar',

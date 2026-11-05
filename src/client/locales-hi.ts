@@ -55,6 +55,7 @@ export const hi: Record<string, string> = {
   editorTreeToggle: 'फ़ाइल ट्री पैनल',
   editorPathPlaceholder: 'फ़ाइल पथ दर्ज करें (सत्र डायरेक्टरी के सापेक्ष या निरपेक्ष), Enter से खोलें',
   editorSearchPlaceholder: 'फ़ाइल नाम से खोजें…',
+  editorLocateCurrent: 'वर्तमान फ़ाइल का पता लगाएँ',
   editorSearchNoResults: 'कोई मेल खाती फ़ाइल नहीं',
   editorSearchTruncated: 'परिणाम बहुत अधिक — आंशिक सूची दिखाई जा रही',
   editorEmptyHint: 'पूर्वावलोकन शुरू करने के लिए दाएँ फ़ाइल ट्री या ऊपर पथ इनपुट से फ़ाइल चुनें',

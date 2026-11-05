@@ -47,6 +47,7 @@ export const ko: Record<string, string> = {
   editorTreeToggle: '파일 트리 패널',
   editorPathPlaceholder: '파일 경로 입력(세션 디렉터리 기준 상대 경로 또는 절대 경로), Enter로 열기',
   editorSearchPlaceholder: '파일 이름으로 검색…',
+  editorLocateCurrent: '현재 파일 찾기',
   editorSearchNoResults: '일치하는 파일 없음',
   editorSearchTruncated: '결과가 너무 많아 일부 일치 항목만 표시합니다',
   editorEmptyHint: '오른쪽 파일 트리나 위쪽 경로 입력란에서 파일을 선택해 미리보기를 시작하세요',

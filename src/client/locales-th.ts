@@ -55,6 +55,7 @@ export const th: Record<string, string> = {
   editorTreeToggle: 'พาเนลต้นไม้ไฟล์',
   editorPathPlaceholder: 'พาธไฟล์ (สัมพันธ์กับไดเรกทอรีเซสชันหรือแบบ absolute), Enter เพื่อเปิด',
   editorSearchPlaceholder: 'ค้นหาไฟล์ตามชื่อ…',
+  editorLocateCurrent: 'ระบุตำแหน่งไฟล์ปัจจุบัน',
   editorSearchNoResults: 'ไม่มีไฟล์ที่ตรง',
   editorSearchTruncated: 'ผลลัพธ์มากเกินไป — แสดงเพียงบางส่วน',
   editorEmptyHint: 'เลือกไฟล์จากพาเนลต้นไม้ไฟล์หรือช่องกรอกพาธด้านบนเพื่อเริ่มพรีวิว',

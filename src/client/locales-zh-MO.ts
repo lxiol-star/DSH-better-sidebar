@@ -70,6 +70,7 @@ export const zhMO: Record<string, string> = {
   editorTreeToggle: '檔案樹面板',
   editorPathPlaceholder: '輸入檔案路徑（相對工作階段目錄或絕對路徑），Enter 開啟',
   editorSearchPlaceholder: '按檔案名稱搜尋…',
+  editorLocateCurrent: '定位目前檔案',
   editorSearchNoResults: '無匹配檔案',
   editorSearchTruncated: '結果過多，僅顯示部分匹配',
   editorEmptyHint: '從右側檔案樹或上方路徑輸入框選擇檔案開始預覽',

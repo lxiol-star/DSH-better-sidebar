@@ -87,6 +87,51 @@ export function isWithinWorkspace(base: string, target: string): boolean {
 }
 
 /**
+ * Collapse '.'/'..' segments and repeated separators, without touching the
+ * filesystem or the case. The explorer's row paths are the host's own single-
+ * separator spellings; a path the user TYPED (the editor's path bar stores what
+ * it was given) can carry `./` or `src/../src`, and a row comparison against
+ * that spelling never matches.
+ *
+ * A leading '/' (POSIX), '\\'/'/' doubled prefix (UNC) or drive segment is
+ * preserved, so absolute forms round-trip. '..' that climbs past the root is
+ * kept: refusing it is the caller's business, not a silent clamp.
+ */
+export function normalizePath(path: string): string {
+  const separator = path.includes('\\') ? '\\' : '/'
+  const prefix = path.startsWith('\\\\') || path.startsWith('//')
+    ? path.slice(0, 2)
+    : path.startsWith('/') || path.startsWith('\\') ? path.slice(0, 1) : ''
+  const parts: string[] = []
+  for (const part of path.split(/[\\/]+/)) {
+    if (part === '' || part === '.') continue
+    if (part === '..') {
+      if (parts.length > 0 && parts[parts.length - 1] !== '..') parts.pop()
+      else parts.push('..')
+      continue
+    }
+    parts.push(part)
+  }
+  return prefix + parts.join(separator)
+}
+
+/**
+ * The explorer row path a "locate current file" reveal should target: the
+ * previewed file resolved against the explorer root and normalized, or
+ * `undefined` when the tree can never show it — no root, a path outside the
+ * root, or one that climbs out of it. `revealPaths` synthesizes an ancestor
+ * chain for ANY path it is handed, so a foreign path would highlight nothing
+ * and persist `expanded` entries no level ever matches.
+ * @param cwd - the explorer root (the docked tree's `cwd`).
+ * @param path - the viewer's tab path (relative spellings are joined onto cwd).
+ */
+export function explorerRevealPath(cwd: string | undefined, path: string): string | undefined {
+  if (cwd === undefined || cwd === '' || path === '') return undefined
+  const target = normalizePath(resolveSidebarPath(cwd, path))
+  return isWithinWorkspace(cwd, target) ? target : undefined
+}
+
+/**
  * The last path segment of a '/'- or '\'-separated path (a diff tab title,
  * a worktree label). Returns the whole string when no separator is present.
  */

@@ -55,6 +55,7 @@ export const ja: Record<string, string> = {
   editorTreeToggle: 'ファイルツリーパネル',
   editorPathPlaceholder: 'ファイルパス（セッションディレクトリからの相対 or 絶対）、Enter で開く',
   editorSearchPlaceholder: 'ファイル名で検索…',
+  editorLocateCurrent: '現在のファイルを表示',
   editorSearchNoResults: '一致するファイルはありません',
   editorSearchTruncated: '結果が多すぎます — 一部のみ表示',
   editorEmptyHint: '右のファイルツリーまたは上のパス入力欄からファイルを選んでプレビュー',

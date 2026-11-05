@@ -2,7 +2,7 @@ import './browser-globals.ts'
 import { describe, expect, it } from 'vitest'
 import { decodeHtmlUrl } from '../src/html-route.ts'
 import { isAbsolutePath, relativeTo, workspaceRelativePath } from '../src/client/paths.ts'
-import { resolveSidebarPath } from '../src/client/paths.ts'
+import { explorerRevealPath, normalizePath, resolveSidebarPath } from '../src/client/paths.ts'
 import { downloadUrl, htmlUrl, mediaUrl } from '../src/client/api.ts'
 
 describe('path helpers', () => {
@@ -136,5 +136,55 @@ describe('workspaceRelativePath', () => {
     ['C:/Work', 'D:/Work/a.ts'],
   ])('refuses an unavailable root or unsafe projection %j / %s', (root, path) => {
     expect(workspaceRelativePath(root, path)).toBeUndefined()
+  })
+})
+
+describe('normalizePath', () => {
+  it.each([
+    ['/w/a.ts', '/w/a.ts'],
+    ['/w/./a.ts', '/w/a.ts'],
+    ['/w/src/../a.ts', '/w/a.ts'],
+    ['/w//a.ts', '/w/a.ts'],
+    ['/w/src/./deep/../a.ts', '/w/src/a.ts'],
+    ['/w/src/', '/w/src'],
+    ['/', '/'],
+    ['', ''],
+  ])('collapses %j to %j', (input, expected) => {
+    expect(normalizePath(input)).toBe(expected)
+  })
+
+  it('keeps climbed-out ".." instead of silently clamping it to the root', () => {
+    expect(normalizePath('/w/../../a.ts')).toBe('/../a.ts')
+    expect(normalizePath('/../a.ts')).toBe('/../a.ts')
+  })
+
+  it('round-trips windows drive and UNC spellings', () => {
+    // The separator of the input decides the joined one (like ancestorDirs).
+    expect(normalizePath('C:\\Work\\src\\..\\a.ts')).toBe('C:\\Work\\a.ts')
+    expect(normalizePath('C:/Work/./a.ts')).toBe('C:/Work/a.ts')
+    expect(normalizePath('\\\\server\\share\\.\\a.ts')).toBe('\\\\server\\share\\a.ts')
+    expect(normalizePath('//server/share/../a.ts')).toBe('//server/a.ts')
+  })
+})
+
+describe('explorerRevealPath (locate in tree)', () => {
+  it('normalizes the typed spelling against the explorer root', () => {
+    expect(explorerRevealPath('/w', './src/a.ts')).toBe('/w/src/a.ts')
+    expect(explorerRevealPath('/w', 'src/../src/a.ts')).toBe('/w/src/a.ts')
+    expect(explorerRevealPath('/w/', '/w/./src/a.ts')).toBe('/w/src/a.ts')
+    expect(explorerRevealPath('C:\\Work', 'src\\a.ts')).toBe('C:\\Work\\src\\a.ts')
+  })
+
+  it.each([
+    [undefined, '/w/a.ts'],
+    ['', '/w/a.ts'],
+    ['/w', ''],
+    ['/w', '/outside/a.ts'],
+    ['/w', '../outside/a.ts'],
+    ['/w', '/w/../outside/a.ts'],
+    ['/w', '~/a.ts'],
+    ['C:/Work', 'D:/Work/a.ts'],
+  ])('refuses a path the tree cannot show %j / %j', (cwd, path) => {
+    expect(explorerRevealPath(cwd as string | undefined, path)).toBeUndefined()
   })
 })

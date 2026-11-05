@@ -57,6 +57,7 @@ export const pl: Record<string, string> = {
   editorTreeToggle: 'Panel drzewa plików',
   editorPathPlaceholder: 'Ścieżka pliku (względna do katalogu sesji lub bezwzględna), Enter, aby otworzyć',
   editorSearchPlaceholder: 'Szukaj po nazwie pliku…',
+  editorLocateCurrent: 'Zlokalizuj bieżący plik',
   editorSearchNoResults: 'Brak pasujących plików',
   editorSearchTruncated: 'Zbyt wiele wyników — pokazuję częściową listę',
   editorEmptyHint: 'Wybierz plik z panelu drzewa lub pola ścieżki powyżej, aby rozpocząć podgląd',

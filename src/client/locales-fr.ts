@@ -48,6 +48,7 @@ export const fr: Record<string, string> = {
   editorTreeToggle: 'Panneau d’arborescence',
   editorPathPlaceholder: 'Saisissez un chemin de fichier (relatif au répertoire de session ou absolu), Entrée pour ouvrir',
   editorSearchPlaceholder: 'Rechercher par nom de fichier…',
+  editorLocateCurrent: 'Localiser le fichier actuel',
   editorSearchNoResults: 'Aucun fichier correspondant',
   editorSearchTruncated: 'Trop de résultats, seule une partie des correspondances est affichée',
   editorEmptyHint: 'Choisissez un fichier dans l’arborescence à droite ou dans le champ de chemin ci-dessus pour commencer l’aperçu',

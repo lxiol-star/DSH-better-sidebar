@@ -41,6 +41,7 @@ export const de: Record<string, string> = {
   editorTreeToggle: 'Dateibaum-Panel',
   editorPathPlaceholder: 'Dateipfad (relativ zum Sitzungsverzeichnis oder absolut), Enter zum Öffnen',
   editorSearchPlaceholder: 'Nach Dateiname suchen…',
+  editorLocateCurrent: 'Aktuelle Datei anzeigen',
   editorSearchNoResults: 'Keine passenden Dateien',
   editorSearchTruncated: 'Zu viele Ergebnisse – nur ein Teil wird angezeigt',
   editorEmptyHint: 'Wählen Sie eine Datei aus dem Dateibaum rechts oder dem Pfadeingabefeld oben, um mit der Vorschau zu beginnen',
