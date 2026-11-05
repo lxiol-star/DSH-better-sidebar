@@ -55,6 +55,7 @@ export const tr: Record<string, string> = {
   editorTreeToggle: 'Dosya ağacı paneli',
   editorPathPlaceholder: 'Dosya yolu (oturum dizinine göreli veya mutlak), Enter ile aç',
   editorSearchPlaceholder: 'Dosya adına göre ara…',
+  editorLocateCurrent: 'Geçerli dosyayı bul',
   editorSearchNoResults: 'Eşleşen dosya yok',
   editorSearchTruncated: 'Sonuç çok fazla — kısmi liste gösteriliyor',
   editorEmptyHint: 'Önizlemeye başlamak için sağdaki dosya ağacından veya yukarıdaki yol girişinden bir dosya seçin',

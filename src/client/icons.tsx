@@ -92,6 +92,16 @@ export const IconSaveOutline16 = ({ size = 16, className }: IconProps) => (
   </svg>
 )
 
+/** Locate glyph: a crosshair — the "bring the current file into view" mark
+ *  on the tree panel's search row (no matching glyph in the primitives set). */
+export const IconLocateOutline16 = ({ size = 16, className }: IconProps) => (
+  <svg width={size} height={size} className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="8" cy="8" r="5" stroke="currentColor" strokeWidth="1.5" />
+    <path d="M8 1.25v2.2M8 12.55v2.2M1.25 8h2.2M12.55 8h2.2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <circle cx="8" cy="8" r="1.15" fill="currentColor" />
+  </svg>
+)
+
 /**
  * Visual Studio Code brand mark for the file-tree "open with" menu. The
  * path is the Simple Icons `visualstudiocode` glyph (CC0 1.0,

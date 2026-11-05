@@ -66,6 +66,7 @@ export declare const zh: {
     editorTreeToggle: string;
     editorPathPlaceholder: string;
     editorSearchPlaceholder: string;
+    editorLocateCurrent: string;
     editorSearchNoResults: string;
     editorSearchTruncated: string;
     editorEmptyHint: string;

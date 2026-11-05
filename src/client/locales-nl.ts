@@ -53,6 +53,7 @@ export const nl: Record<string, string> = {
   editorTreeToggle: 'Bestandsboompaneel',
   editorPathPlaceholder: 'Voer een bestandspad in (relatief aan de sessiemap of absoluut), Enter om te openen',
   editorSearchPlaceholder: 'Zoek op bestandsnaam…',
+  editorLocateCurrent: 'Huidig bestand vinden',
   editorSearchNoResults: 'Geen overeenkomende bestanden',
   editorSearchTruncated: 'Te veel resultaten — een gedeeltelijke lijst wordt getoond',
   editorEmptyHint: 'Kies een bestand uit het boompaneel of het pad-invoerveld hierboven om te beginnen met previewen',

@@ -30,6 +30,9 @@ export declare const IconHistoryOutline16: ({ size, className }: IconProps) => i
 /** Save glyph (save-as-new-session): the classic floppy disk, in the app's
  *  outline style. */
 export declare const IconSaveOutline16: ({ size, className }: IconProps) => import("react").JSX.Element;
+/** Locate glyph: a crosshair — the "bring the current file into view" mark
+ *  on the tree panel's search row (no matching glyph in the primitives set). */
+export declare const IconLocateOutline16: ({ size, className }: IconProps) => import("react").JSX.Element;
 /**
  * Visual Studio Code brand mark for the file-tree "open with" menu. The
  * path is the Simple Icons `visualstudiocode` glyph (CC0 1.0,

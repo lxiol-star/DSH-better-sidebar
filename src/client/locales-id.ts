@@ -53,6 +53,7 @@ export const id: Record<string, string> = {
   editorTreeToggle: 'Panel pohon berkas',
   editorPathPlaceholder: 'Path berkas (relatif terhadap direktori sesi atau absolut), Enter untuk membuka',
   editorSearchPlaceholder: 'Cari berkas berdasarkan nama…',
+  editorLocateCurrent: 'Temukan berkas saat ini',
   editorSearchNoResults: 'Tidak ada berkas yang cocok',
   editorSearchTruncated: 'Terlalu banyak hasil — menampilkan daftar parsial',
   editorEmptyHint: 'Pilih berkas dari panel pohon atau input path di atas untuk mulai pratinjau',

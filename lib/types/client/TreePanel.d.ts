@@ -43,6 +43,11 @@ export declare function TreePanel(props: {
     /** Full-window presentation: the panel fills its host instead of docking
      *  at a fixed width. */
     full?: boolean;
+    /** Reveal the file its host is currently showing (the search row's locate
+     *  button): expand the ancestors, highlight the row and scroll the tree
+     *  body to it. Absent → no locate button (the standalone explorer has no
+     *  "current file", and a folder window has no viewer). */
+    onRevealActive?: () => void;
     /** The sidebar registry service (file-icon registrations; passed through to FileTree). */
     service?: BetterSidebarService;
 }): import("react").JSX.Element;

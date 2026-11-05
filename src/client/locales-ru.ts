@@ -51,6 +51,7 @@ export const ru: Record<string, string> = {
   editorTreeToggle: 'Панель дерева файлов',
   editorPathPlaceholder: 'Введите путь к файлу (относительно каталога сессии или абсолютный), Enter, чтобы открыть',
   editorSearchPlaceholder: 'Поиск по имени файла…',
+  editorLocateCurrent: 'Показать текущий файл',
   editorSearchNoResults: 'Нет совпадающих файлов',
   editorSearchTruncated: 'Слишком много результатов — показана часть совпадений',
   editorEmptyHint: 'Выберите файл из дерева справа или введите путь выше, чтобы начать предпросмотр',

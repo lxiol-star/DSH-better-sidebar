@@ -55,6 +55,7 @@ export const vi: Record<string, string> = {
   editorTreeToggle: 'Panel cây tệp',
   editorPathPlaceholder: 'Nhập đường dẫn tệp (tương đối thư mục phiên hoặc tuyệt đối), Enter để mở',
   editorSearchPlaceholder: 'Tìm theo tên tệp…',
+  editorLocateCurrent: 'Định vị tệp hiện tại',
   editorSearchNoResults: 'Không có tệp phù hợp',
   editorSearchTruncated: 'Quá nhiều kết quả, chỉ hiển thị một phần',
   editorEmptyHint: 'Chọn tệp từ cây tệp bên phải hoặc ô nhập đường dẫn phía trên để xem trước',

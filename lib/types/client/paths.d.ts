@@ -64,6 +64,29 @@ export declare function isWithinWorkspace(base: string, target: string): boolean
  */
 export declare function editorPathDisplay(cwd: string | undefined, path: string, absolute: boolean): string;
 /**
+ * Collapse '.'/'..' segments and repeated separators, without touching the
+ * filesystem or the case. The explorer's row paths are the host's own single-
+ * separator spellings; a path the user TYPED (the editor's path bar stores what
+ * it was given) can carry `./` or `src/../src`, and a row comparison against
+ * that spelling never matches.
+ *
+ * A leading '/' (POSIX), '\\'/'/' doubled prefix (UNC) or drive segment is
+ * preserved, so absolute forms round-trip. '..' that climbs past the root is
+ * kept: refusing it is the caller's business, not a silent clamp.
+ */
+export declare function normalizePath(path: string): string;
+/**
+ * The explorer row path a "locate current file" reveal should target: the
+ * previewed file resolved against the explorer root and normalized, or
+ * `undefined` when the tree can never show it — no root, a path outside the
+ * root, or one that climbs out of it. `revealPaths` synthesizes an ancestor
+ * chain for ANY path it is handed, so a foreign path would highlight nothing
+ * and persist `expanded` entries no level ever matches.
+ * @param cwd - the explorer root (the docked tree's `cwd`).
+ * @param path - the viewer's tab path (relative spellings are joined onto cwd).
+ */
+export declare function explorerRevealPath(cwd: string | undefined, path: string): string | undefined;
+/**
  * The last path segment of a '/'- or '\'-separated path (a diff tab title,
  * a worktree label). Returns the whole string when no separator is present.
  */

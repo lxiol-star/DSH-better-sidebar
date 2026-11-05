@@ -56,6 +56,7 @@ export const ar: Record<string, string> = {
   editorTreeToggle: 'لوحة شجرة الملفات',
   editorPathPlaceholder: 'مسار الملف (نسبي لدليل الجلسة أو مطلق)، Enter للفتح',
   editorSearchPlaceholder: 'البحث في الملفات بالاسم…',
+  editorLocateCurrent: 'تحديد موقع الملف الحالي',
   editorSearchNoResults: 'لا ملفات مطابقة',
   editorSearchTruncated: 'نتائج كثيرة جداً — عرض قائمة جزئية',
   editorEmptyHint: 'اختر ملفاً من لوحة الشجرة أو من حقل المسار بالأعلى لبدء المعاينة',
