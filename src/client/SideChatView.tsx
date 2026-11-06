@@ -70,6 +70,7 @@ import {
 import { SIDECHAT_MAX_ATTACHMENTS } from '../sidechat-attachment-core.ts'
 import { useMarkdownSurface } from './use-markdown-surface.ts'
 import { IconHistoryOutline16, IconSaveOutline16, IconUploadOutline16 } from './icons.tsx'
+import { SideChatLinks } from './SideChatLinks.tsx'
 import type { Context, SidebarHistoryEntry, SidebarSessionEvent } from '../context-types.ts'
 import {
   SIDE_LABEL_PREFIX,
@@ -1331,6 +1332,11 @@ export function SideChatView(props: {
 
   return (
     <div className={css.sidechat}>
+      {/* 「关联会话」: which OTHER sessions this conversation has exchanged
+          messages with, derived read-only from its own log. It sits above the
+          transcript because it is session-level context, not part of the
+          thread; visibility-gated so a hidden tab never fetches. */}
+      <SideChatLinks ctx={ctx} scope={{ sessionId: scope.sessionId, cwd: scope.cwd }} visible={visible} />
       {connectionState !== undefined && connectionState !== 'connected' && (
         <ConnectionIndicator
           state={connectionState}

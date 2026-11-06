@@ -1,4 +1,5 @@
 import type { SidechatLiveEvent, SidechatLogEvent, SidechatModelCatalog, SidechatModelSelection, SidechatPendingInput, SidechatThreadInfo } from '../sidechat-core.ts';
+import type { SessionLinksResult } from '../session-links.ts';
 import type { SidechatAttachmentSummary, SidechatUploadedAttachment } from '../sidechat-attachment-core.ts';
 import type { SidebarCreateTeamTaskRequest, SidebarChildLiveView, SidebarSessionEvent, SidebarTeamTaskView, SidebarUpdateTeamTaskRequest } from '../context-types.ts';
 import type { WorkflowRunView } from '../workflow-runs.ts';
@@ -432,6 +433,17 @@ export declare const api: {
      * absence is the normal case, never an error.
      */
     workflowsList: (rootSessionId: string, signal?: AbortSignal) => Promise<WorkflowsListResult>;
+    /**
+     * The inter-session links of one session: every counterpart it exchanged
+     * messages with, both directions, newest first.
+     *
+     * Read-only and derived host-side from THIS session's own stored log (the
+     * delivering `tool/call` rows for outbound, the relayed `user/message`
+     * `source` for inbound — see src/session-links.ts). A session whose log
+     * cannot be read answers an EMPTY edge set; the panel renders that as the
+     * honest "never communicated across sessions" state rather than an error.
+     */
+    linksEdges: (scope: SessionScope, signal?: AbortSignal) => Promise<SessionLinksResult>;
     /** Create one shared task on the root-led team. */
     teamsTaskCreate: (rootSessionId: string, req: TeamsTaskCreateRequest) => Promise<TeamsTaskMutationResult>;
     /** CAS-mutate one shared task; a stale revision yields `team-conflict`. */
