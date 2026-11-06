@@ -62,8 +62,14 @@ import {
   type TerminalBlockLabels,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import { markdownTextProps } from './markdown-labels.tsx'
+import { ComposerAttachmentTray, SentAttachmentChips } from './SidechatAttachments.tsx'
+import {
+  useSidechatAttachmentQueue,
+  type SidechatAttachmentFailure,
+} from './use-sidechat-attachments.ts'
+import { SIDECHAT_MAX_ATTACHMENTS } from '../sidechat-attachment-core.ts'
 import { useMarkdownSurface } from './use-markdown-surface.ts'
-import { IconHistoryOutline16, IconSaveOutline16 } from './icons.tsx'
+import { IconHistoryOutline16, IconSaveOutline16, IconUploadOutline16 } from './icons.tsx'
 import type { Context, SidebarHistoryEntry, SidebarSessionEvent } from '../context-types.ts'
 import {
   SIDE_LABEL_PREFIX,
@@ -333,6 +339,31 @@ function threadDisplayTitle(title: string): string {
   return title.startsWith(SIDE_LABEL_PREFIX) ? title.slice(SIDE_LABEL_PREFIX.length) : title
 }
 
+/**
+ * The localized sentence for one attachment refusal/failure. Refusal codes are
+ * product limits (sized from the shared constants); `host` / `network` carry
+ * the host's own message because the cause is deployment-specific.
+ *
+ * @param failure - the queue's last failure (null hides the banner).
+ * @returns the sentence, or null when there is nothing to show.
+ */
+function attachmentFailureText(failure: SidechatAttachmentFailure | null): string | null {
+  if (failure === null) return null
+  switch (failure.code) {
+    case 'too-many':
+      return t('sideChatAttachTooMany', { count: SIDECHAT_MAX_ATTACHMENTS })
+    case 'too-large':
+      return t('sideChatAttachTooLarge')
+    case 'invalid-name':
+      return t('sideChatAttachInvalidName')
+    case 'unsupported-image':
+      return t('sideChatAttachUnsupportedImage')
+    case 'network':
+    case 'host':
+      return t('sideChatAttachFailed', { message: failure.message ?? '' })
+  }
+}
+
 /** How long a composer-bar control waits before its hover bubble opens. */
 const TIP_DELAY_MS = 120
 
@@ -472,12 +503,28 @@ function toolLeading(name: string, failed: boolean): React.ReactNode {
 /** One row renderer (React keys ride the source event seq). `rewrite` is the
  *  surface's markdown link pass — the rows are model prose, so a relative link
  *  resolves against the session cwd (see use-markdown-surface). */
-function renderRow(row: SidechatTranscriptRow, labels: RowLabels, rewrite: (text: string) => string): React.ReactNode {
+function renderRow(
+  row: SidechatTranscriptRow,
+  labels: RowLabels,
+  rewrite: (text: string) => string,
+  threadId: string | undefined,
+): React.ReactNode {
   switch (row.kind) {
     case 'user':
       return (
         <div key={`${row.kind}:${row.seq}`} className={css.sidechatUser}>
-          <MarkdownText {...markdownTextProps(rewrite(row.text), labels)} />
+          {row.text !== '' && <MarkdownText {...markdownTextProps(rewrite(row.text), labels)} />}
+          {row.attachments !== undefined && (
+            <SentAttachmentChips attachments={row.attachments} childId={threadId} />
+          )}
+          {row.note === true && <div className={css.sidechatAttachmentNote}>{t('sideChatAttachTextOnly')}</div>}
+          {row.context !== undefined && (
+            <div className={css.sidechatUserContext}>
+              <CollapsibleRow label={t('sideChatAttachmentContext')}>
+                <pre className={css.sidechatAttachmentContextBody}>{row.context}</pre>
+              </CollapsibleRow>
+            </div>
+          )}
         </div>
       )
     case 'assistant':
@@ -645,8 +692,9 @@ export function SideChatView(props: {
   /** Local echo of the message just sent: shown until the host reports it
    *  pending or logs it durably (see the drop effect below). `seq` is the
    *  transcript tail at send time, so an OLDER identical message cannot
-   *  retire the echo. */
-  const [echo, setEcho] = useState<{ text: string; seq: number } | null>(null)
+   *  retire the echo; the attachment count joins the match because an
+   *  attachment-only message and a plain message can both be empty text. */
+  const [echo, setEcho] = useState<{ text: string; attachmentCount: number; seq: number } | null>(null)
 
   const cacheRef = useRef<ThreadCache>({ entries: [], live: [], pending: [] })
   // The previous poll's rows (see the mapping's reuse pass below).
@@ -668,6 +716,14 @@ export function SideChatView(props: {
     chatSurfaceRef(element)
   }, [chatSurfaceRef])
   const composerRef = useRef<HTMLTextAreaElement | null>(null)
+  /** The composer's attach queue (uploads start the moment a file is picked). */
+  const attachments = useSidechatAttachmentQueue(threadId)
+  /** The hidden file picker the composer-bar paperclip opens. */
+  const filePickerRef = useRef<HTMLInputElement | null>(null)
+  /** Drag-over the composer: styles the drop target (files paste/drop alike). */
+  const [dragOver, setDragOver] = useState(false)
+  /** The localized sentence of the queue's last refusal (null = no banner). */
+  const attachmentFailureMessage = attachmentFailureText(attachments.failure)
 
   const summary = threadId === undefined ? undefined : list.byId[threadId]
   const running = summary?.running === true
@@ -928,21 +984,27 @@ export function SideChatView(props: {
   // either the unclaimed inbox lists it (the claim has not happened yet) or a
   // durable user row NEWER than the send logged it (the claim already ran).
   // An identical older message cannot retire the echo — the seq gate.
-  const echoText = echo?.text ?? ''
+  const echoMatchesPending = (item: SidechatPendingInput): boolean =>
+    echo !== null && item.text === echo.text && (item.attachments?.length ?? 0) === echo.attachmentCount
   useEffect(() => {
     if (echo === null || busy === 'sending') return
-    if (pendingRows.some(item => item.text === echo.text)) {
+    if (pendingRows.some(item => echoMatchesPending(item))) {
       setEcho(null)
       return
     }
-    if (rows.some(row => row.kind === 'user' && row.seq > echo.seq && row.text === echo.text)) {
+    if (rows.some(row => row.kind === 'user' && row.seq > echo.seq
+      && row.text === echo.text && (row.attachments?.length ?? 0) === echo.attachmentCount)) {
       setEcho(null)
     }
+    // `echoMatchesPending` is derived from the state values below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [echo, busy, pendingRows, rows])
   /** The echo is hidden the moment the inbox already carries the same text
    *  (the retire effect above then drops the state) so the message never shows
    *  twice for a frame. */
-  const showEcho = echo !== null && !pendingRows.some(item => item.text === echo.text)
+  const showEcho = echo !== null && !pendingRows.some(item => echoMatchesPending(item))
+  /** The echo's text for the stick-to-bottom dependency (send clears composer). */
+  const echoText = echo?.text ?? ''
 
   const canSave = threadId !== undefined && threadHasCompletedTurn(cacheRef.current.entries)
   const trailingPending = threadId !== undefined && threadTrailingPending(cacheRef.current.entries)
@@ -1098,28 +1160,61 @@ export function SideChatView(props: {
 
   const handleSend = async (): Promise<void> => {
     const text = composer.trim()
-    if (text === '' || threadId === undefined || busy !== null) return
+    // The ready uploads are the ones the prompt may cite; a row still in
+    // flight blocks the send (its id does not exist yet) and a failed row is
+    // ignored here — it keeps its error chip until the user removes it.
+    const uploadIds = attachments.readyIds
+    if (threadId === undefined || busy !== null || attachments.uploading) return
+    if (text === '' && uploadIds.length === 0) return
     setBusy('sending')
     setError(null)
     // Local echo: the host accepts a message into the child's inbox and only
     // LOGS it when a step claims it, so between those moments the message used
     // to be invisible ("sent, nothing happened"). The bubble shows at once and
     // is retired once the inbox or the log carries the message.
-    setEcho({ text, seq: cacheRef.current.entries.at(-1)?.event.seq ?? 0 })
+    setEcho({ text, attachmentCount: uploadIds.length, seq: cacheRef.current.entries.at(-1)?.event.seq ?? 0 })
     try {
-      await api.sidechatPrompt(threadId, text)
+      await api.sidechatPrompt(threadId, text, uploadIds)
       setComposer('')
       const field = composerRef.current
       if (field !== null) field.style.height = ''
+      attachments.clear()
       void fetchThread(threadId)
       void fetchInfo(threadId)
     } catch (cause) {
-      // Nothing reached the host: drop the echo and say why.
+      // Nothing reached the host: drop the echo and say why. The staged
+      // uploads stay queued (the retry reuses the same ids).
       setEcho(null)
       setError(cause instanceof Error ? cause.message : String(cause))
     } finally {
       setBusy(null)
     }
+  }
+
+  /** One file-picker / drag-drop / paste delivery: the queue validates the
+   *  caps and starts uploading each accepted file at once. */
+  const handleAttachFiles = (files: readonly File[]): void => {
+    if (files.length > 0) attachments.add(files)
+  }
+
+  /** Paste: an image on the clipboard becomes an attachment; text pastes
+   *  normally. A clipboard with BOTH keeps the text and adds the images. */
+  const handlePaste = (event: React.ClipboardEvent<HTMLTextAreaElement>): void => {
+    const files: File[] = []
+    for (const item of event.clipboardData.items) {
+      if (item.kind !== 'file') continue
+      const file = item.getAsFile()
+      if (file !== null) files.push(file)
+    }
+    if (files.length > 0) handleAttachFiles(files)
+  }
+
+  /** Drag-drop on the composer: files are queued exactly like the picker's. */
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>): void => {
+    if (event.dataTransfer.files.length === 0) return
+    event.preventDefault()
+    setDragOver(false)
+    handleAttachFiles([...event.dataTransfer.files])
   }
 
   /** Drop one unclaimed inbox message: the row leaves the queue immediately,
@@ -1252,15 +1347,20 @@ export function SideChatView(props: {
             clickable at all (see use-markdown-surface), scoped to this
             transcript so nothing outside it is claimed. */}
         <MarkdownDelegateProvider openFile={openChatFile}>
-          {rows.map(row => renderRow(row, rowLabels, rewriteChatText))}
+          {rows.map(row => renderRow(row, rowLabels, rewriteChatText, threadId))}
           {/* The unclaimed inbox: accepted messages whose claim has not logged
               them yet. The same bubble surface (and markdown pass) as a
               durable user row, plus the state word and the dequeue button. */}
           {pendingRows.map(item => (
             <div key={`pending:${item.id}`} className={css.sidechatPending}>
-              <div className={css.sidechatPendingText}>
-                <MarkdownText {...markdownTextProps(rewriteChatText(item.text), rowLabels)} />
-              </div>
+              {item.text !== '' && (
+                <div className={css.sidechatPendingText}>
+                  <MarkdownText {...markdownTextProps(rewriteChatText(item.text), rowLabels)} />
+                </div>
+              )}
+              {(item.attachments?.length ?? 0) > 0 && (
+                <SentAttachmentChips attachments={item.attachments ?? []} childId={threadId} />
+              )}
               <div className={css.sidechatPendingMeta}>
                 <StateDot state="ongoing" size={8} />
                 <span>{t('sideChatQueued')}</span>
@@ -1279,9 +1379,16 @@ export function SideChatView(props: {
           {/* The local echo: in flight until the host reports it pending. */}
           {showEcho && echo !== null && (
             <div className={css.sidechatPending}>
-              <div className={css.sidechatPendingText}>
-                <MarkdownText {...markdownTextProps(rewriteChatText(echo.text), rowLabels)} />
-              </div>
+              {echo.text !== '' && (
+                <div className={css.sidechatPendingText}>
+                  <MarkdownText {...markdownTextProps(rewriteChatText(echo.text), rowLabels)} />
+                </div>
+              )}
+              {echo.attachmentCount > 0 && (
+                <div className={css.sidechatEchoAttachments}>
+                  {t('sideChatAttachSentCount', { count: echo.attachmentCount })}
+                </div>
+              )}
               <div className={css.sidechatPendingMeta}>
                 <StateDot state="ongoing" size={8} />
                 <span>{busy === 'sending' ? t('sideChatSending') : t('sideChatQueued')}</span>
@@ -1304,8 +1411,40 @@ export function SideChatView(props: {
       {canSave && trailingPending
         && <div className={css.sidechatHint}>{t('sideChatPendingDrop')}</div>}
       {saved && <div className={css.sidechatHint}>{t('sideChatSaved')}</div>}
+      {attachmentFailureMessage !== null && (
+        <div className={css.sidechatHint}>{attachmentFailureMessage}</div>
+      )}
       {error !== null && <div className={css.sidechatError}>{t('sideChatError', { message: error })}</div>}
-      <div className={css.sidechatComposer}>
+      <div
+        className={clsx(css.sidechatComposer, dragOver && css.sidechatComposerDrag)}
+        onDragOver={event => {
+          if (!event.dataTransfer.types.includes('Files')) return
+          event.preventDefault()
+          setDragOver(true)
+        }}
+        onDragLeave={event => {
+          if (event.currentTarget.contains(event.relatedTarget as Node | null)) return
+          setDragOver(false)
+        }}
+        onDrop={handleDrop}
+      >
+        {/* The picker stays out of the tab order: the paperclip in the bar is
+            the accessible control, this is its native dialog target. */}
+        <input
+          ref={filePickerRef}
+          type="file"
+          multiple
+          hidden
+          onChange={event => {
+            if (event.target.files !== null) handleAttachFiles([...event.target.files])
+            // Reset so picking the SAME file twice fires change again.
+            event.target.value = ''
+          }}
+        />
+        <ComposerAttachmentTray items={attachments.items} onRemove={attachments.remove} />
+        {dragOver && (
+          <div className={css.sidechatComposerDropHint}>{t('sideChatAttachHint')}</div>
+        )}
         <textarea
           ref={composerRef}
           className={css.sidechatComposerInput}
@@ -1316,6 +1455,7 @@ export function SideChatView(props: {
             setComposer(event.target.value)
             growComposer()
           }}
+          onPaste={handlePaste}
           onKeyDown={event => {
             if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) return
             event.preventDefault()
@@ -1329,6 +1469,17 @@ export function SideChatView(props: {
               a hover bubble (ComposerTip) so its meaning is readable without
               leaving the input. */}
           <div className={css.sidechatComposerTools}>
+            <ComposerTip label={t('sideChatAttach')}>
+              <button
+                type="button"
+                className={css.sidechatIconBtn}
+                onClick={() => filePickerRef.current?.click()}
+                disabled={threadId === undefined || busy !== null}
+                aria-label={t('sideChatAttach')}
+              >
+                <IconUploadOutline16 size={14} />
+              </button>
+            </ComposerTip>
             <ComposerTip label={t('sideChatNew')}>
               <button
                 type="button"
@@ -1431,7 +1582,8 @@ export function SideChatView(props: {
                 type="button"
                 className={css.sidechatSendBtn}
                 onClick={() => void handleSend()}
-                disabled={composer.trim() === '' || busy !== null}
+                disabled={(composer.trim() === '' && attachments.readyIds.length === 0)
+                  || attachments.uploading || busy !== null}
                 aria-label={t('sideChatSend')}
               >
                 <IconSendOutlineRegular size={16} />

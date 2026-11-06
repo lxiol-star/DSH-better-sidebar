@@ -80,7 +80,34 @@ export async function readJsonBody(req: SidebarHttpRequest): Promise<unknown> {
 }
 
 /**
- * Read a raw text request body (the editor save route).
+ * Read a raw binary request body (the side-chat attachment upload route).
+ *
+ * Same framing reason as {@link readTextBody}: the bytes are what the caller
+ * stores (the host attachment service hashes them verbatim), so a JSON envelope
+ * would both inflate them and cap one image at the 1 MiB JSON limit. The
+ * returned Buffer is exact — no decoding of any kind happens here.
+ *
+ * @param req - the request face (async-iterable body).
+ * @param limit - maximum accepted body size in bytes.
+ * @returns the exact body bytes.
+ * @throws {SidebarError} too-large beyond the limit.
+ */
+export async function readBytesBody(req: SidebarHttpRequest, limit: number): Promise<Buffer> {
+  const chunks: Buffer[] = []
+  let total = 0
+  for await (const chunk of req) {
+    const buffer = Buffer.from(chunk)
+    total += buffer.length
+    if (total > limit) {
+      throw new SidebarError('too-large', `request body exceeds the ${limit} byte limit`, 413)
+    }
+    chunks.push(buffer)
+  }
+  return Buffer.concat(chunks)
+}
+
+/**
+ * Read one raw text request body (the editor save route).
  *
  * JSON framing was what capped a save at {@link MAX_BODY_BYTES}: the whole
  * document had to be string-escaped into one JSON payload, so a file the

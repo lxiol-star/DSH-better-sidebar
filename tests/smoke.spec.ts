@@ -119,6 +119,7 @@ describe('host plugin smoke', () => {
     expect(routes.map(route => route.path)).toEqual([
       '/sidebar/api',
       '/sidebar/upload',
+      '/sidebar/sidechat/attach',
       '/sidebar/write',
       '/sidebar/bundle',
       '/sidebar/archive',

@@ -22,6 +22,7 @@
  */
 import type { SidebarHistoryEntry, SidebarSessionSummary } from './context-types.ts';
 import type { AssistantLiveChunk } from './assistant-live.ts';
+import { type SidechatAttachmentSummary } from './sidechat-attachment-core.ts';
 /** The durable thread-label prefix (also the row filter in the client list). */
 export declare const SIDE_LABEL_PREFIX = "Side: ";
 /** The pinned label of a freshly created thread that no prompt has reached
@@ -217,6 +218,8 @@ export interface SidechatPendingInput {
     target: 'next-turn' | 'next-step';
     /** Flattened text of the message content ('' when it carries no text). */
     text: string;
+    /** Attachment chips the queued message carries (durable refs, display only). */
+    attachments: SidechatAttachmentSummary[];
 }
 /** One routable model in the host model catalog (a structural slice of the
  *  session controller's own `modelCatalog` rows). */

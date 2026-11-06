@@ -19,6 +19,10 @@ import type {
   SidechatThreadInfo,
 } from '../sidechat-core.ts'
 import type {
+  SidechatAttachmentSummary,
+  SidechatUploadedAttachment,
+} from '../sidechat-attachment-core.ts'
+import type {
   SidebarCreateTeamTaskRequest,
   SidebarChildLiveView,
   SidebarSessionEvent,
@@ -605,9 +609,48 @@ export const api = {
    *  the thread opens empty, the first prompt carries the boundary. */
   sidechatStart: (sessionId: string, question?: string) =>
     call<{ childId: string }>('sidechat.start', { sessionId, question: question ?? '' }),
-  /** Deliver one follow-up message to a Side Chat thread. */
-  sidechatPrompt: (childId: string, text: string) =>
-    call<{ accepted: true }>('sidechat.prompt', { childId, text }),
+  /** Deliver one follow-up message to a Side Chat thread. `attachments` are
+   *  the opaque upload ids the raw attach route returned; the host resolves
+   *  them to the durable refs it staged (the client never sends a ref). */
+  sidechatPrompt: (childId: string, text: string, attachments?: readonly string[]) =>
+    call<{ accepted: true }>('sidechat.prompt', {
+      childId,
+      text,
+      ...(attachments !== undefined && attachments.length > 0 ? { attachments } : {}),
+    }),
+  /** Upload one composer attachment as raw bytes (no base64/JSON inflation):
+   *  the host validates name/type/size, commits it to the attachment store,
+   *  and answers the opaque staging id the prompt references. */
+  sidechatAttach: async (childId: string, file: File, signal?: AbortSignal):
+  Promise<SidechatUploadedAttachment> => {
+    const params = new URLSearchParams({ childId, name: file.name })
+    if (file.type !== '') params.set('mediaType', file.type)
+    let response: Response
+    try {
+      response = await fetch(hostRouteUrl(`sidebar/sidechat/attach?${params.toString()}`).href, {
+        method: 'POST',
+        headers: { 'content-type': 'application/octet-stream' },
+        body: file,
+        signal,
+      })
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') throw error
+      throw new SidebarApiError('network', error instanceof Error ? error.message : String(error))
+    }
+    return readEnvelope<SidechatUploadedAttachment>(response)
+  },
+  /** Read one durable image attachment's bytes for a transcript thumbnail.
+   *  The reference rides the logged message; the host store verifies it. */
+  sidechatAttachment: (childId: string, attachment: SidechatAttachmentSummary) =>
+    call<{ data: string; mediaType: string }>('sidechat.attachment', {
+      childId,
+      attachment: {
+        attachmentId: attachment.attachmentId,
+        bytes: attachment.bytes,
+        name: attachment.name,
+        ...attachment.image,
+      },
+    }),
   /** Abort a Side Chat thread's running turn (queued work is preserved). */
   sidechatCancel: (childId: string) =>
     call<{ accepted: true }>('sidechat.cancel', { childId }),

@@ -24,6 +24,7 @@
  */
 import type { DiffHunk, ReadBlockLine } from '@deepseek-ai/dsh-client-ui-primitives';
 import type { SidebarHistoryEntry } from '../context-types.ts';
+import { type SidechatAttachmentSummary } from '../sidechat-attachment-core.ts';
 /**
  * Structured render payload for a tool row that maps onto one of the host's
  * ui-primitives Blocks (the same atoms the main conversation renders). Derived
@@ -61,6 +62,12 @@ export type SidechatTranscriptRow =
     seq: number;
     text: string;
     messageId?: string;
+    /** Durable attachments the message carried (absent on plain text). */
+    attachments?: SidechatAttachmentSummary[];
+    /** Inlined text-file bodies, rendered as a collapsed row (absent when none). */
+    context?: string;
+    /** True when a text-only model could not receive the message's images. */
+    note?: boolean;
 }
 /** A context injection (the side boundary prompt + the parked in-progress
  *  snapshot, or any plugin-sourced context): rendered as one collapsible
@@ -125,6 +132,22 @@ export declare function formatDurationMs(ms: number): string;
 /** Extract the visible text of a content-block list (`text` blocks verbatim,
  *  joined by blank lines); empty reads `…` so rows never render blank. */
 export declare function blockText(content: readonly unknown[]): string;
+/**
+ * Split one user message's content into the parts the transcript renders:
+ * the user's own prose, the durable attachment chips, the generated inline
+ * file context (collapsed, never dumped into the bubble), and the generated
+ * text-only-image note (localized by the view).
+ *
+ * @param content - the `user/message` event's `data.content`.
+ * @returns the four parts; attachments/context are empty-safe.
+ */
+export interface SidechatUserContent {
+    text: string;
+    attachments: SidechatAttachmentSummary[];
+    context: string | null;
+    note: boolean;
+}
+export declare function userContentOf(content: unknown): SidechatUserContent;
 /**
  * One-line summary of a tool call's raw arguments JSON for the collapsed
  * row: the first identifying string field when the JSON parses, else the

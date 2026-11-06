@@ -545,9 +545,9 @@ describe('pending inbox folding', () => {
       [message('s1', 'steering')],
       [message('t1', 'turn one'), message('t2', 'turn two')],
     )).toEqual([
-      { id: 's1', target: 'next-step', text: 'steering' },
-      { id: 't1', target: 'next-turn', text: 'turn one' },
-      { id: 't2', target: 'next-turn', text: 'turn two' },
+      { id: 's1', target: 'next-step', text: 'steering', attachments: [] },
+      { id: 't1', target: 'next-turn', text: 'turn one', attachments: [] },
+      { id: 't2', target: 'next-turn', text: 'turn two', attachments: [] },
     ])
   })
 
@@ -560,8 +560,8 @@ describe('pending inbox folding', () => {
       { id: 'm1', content: [{ type: 'text', text: 'a' }, { type: 'image' }, { type: 'text', text: 'b' }] },
       { id: 'm2' },
     ])).toEqual([
-      { id: 'm1', target: 'next-turn', text: 'a\nb' },
-      { id: 'm2', target: 'next-turn', text: '' },
+      { id: 'm1', target: 'next-turn', text: 'a\nb', attachments: [] },
+      { id: 'm2', target: 'next-turn', text: '', attachments: [] },
     ])
   })
 

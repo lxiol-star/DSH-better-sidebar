@@ -23,6 +23,11 @@
 import type { SidebarHistoryEntry, SidebarSessionSummary } from './context-types.ts'
 import type { AssistantLiveChunk } from './assistant-live.ts'
 import { foldSurface, isSurfaceEligibleType } from '@deepseek-ai/dsh-session/surface'
+import {
+  attachmentSummariesOf,
+  isTextOnlyImageNote,
+  type SidechatAttachmentSummary,
+} from './sidechat-attachment-core.ts'
 
 /** The durable thread-label prefix (also the row filter in the client list). */
 export const SIDE_LABEL_PREFIX = 'Side: '
@@ -1206,6 +1211,8 @@ export interface SidechatPendingInput {
   target: 'next-turn' | 'next-step'
   /** Flattened text of the message content ('' when it carries no text). */
   text: string
+  /** Attachment chips the queued message carries (durable refs, display only). */
+  attachments: SidechatAttachmentSummary[]
 }
 
 /** One routable model in the host model catalog (a structural slice of the
@@ -1245,7 +1252,9 @@ export interface SidechatModelCatalog {
   failures: readonly { id: string; name?: string; message: string }[]
 }
 
-/** Flatten one pending message's content into the text the bubble shows. */
+/** Flatten one pending message's content into the text the bubble shows. The
+ *  generated text-only-image note is NOT user prose and is left out (the
+ *  bubble renders it as a localized hint instead). */
 function pendingText(message: unknown): string {
   const content = (message as { content?: unknown } | undefined)?.content
   if (typeof content === 'string') return content
@@ -1254,7 +1263,9 @@ function pendingText(message: unknown): string {
   for (const block of content) {
     if (block === null || typeof block !== 'object') continue
     const item = block as { type?: unknown; text?: unknown }
-    if (item.type === 'text' && typeof item.text === 'string') parts.push(item.text)
+    if (item.type === 'text' && typeof item.text === 'string' && !isTextOnlyImageNote(item.text)) {
+      parts.push(item.text)
+    }
   }
   return parts.join('\n')
 }
@@ -1279,7 +1290,13 @@ export function pendingInputs(
   const add = (message: unknown, target: SidechatPendingInput['target']): void => {
     const id = pendingInputId(message)
     if (id === undefined) return
-    rows.push({ id, target, text: pendingText(message) })
+    const content = (message as { content?: unknown } | undefined)?.content
+    rows.push({
+      id,
+      target,
+      text: pendingText(message),
+      attachments: attachmentSummariesOf(content),
+    })
   }
   for (const message of nextStep) add(message, 'next-step')
   for (const message of nextTurn) add(message, 'next-turn')

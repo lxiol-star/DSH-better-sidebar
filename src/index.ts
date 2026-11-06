@@ -46,6 +46,7 @@ import { buildSubagentLiveApi, type SidebarSubagentLiveRoutes } from './subagent
 import { buildTeamsApi, type SidebarTeamsRoutes } from './team-routes.ts'
 import { buildWorkflowsApi, type SidebarWorkflowRoutes } from './workflow-routes.ts'
 import { buildSidechatApi } from './sidechat-routes.ts'
+import { registerSidechatAttachmentRoute } from './sidechat-attachment-host.ts'
 import { createAssistantLiveBuffer, type AssistantLiveBuffer } from './assistant-live.ts'
 import { readJsonBody, readTextBody, requireString, SidebarError, writeError, writeJson, writeOk } from './wire.ts'
 import { streamFileToResponse } from './file-stream.ts'
@@ -1526,6 +1527,14 @@ export function apply(ctx: Context, config?: SidebarConfig): void {
       }
     },
   }), 'dsh-better-sidebar: /sidebar/upload route')
+
+  // ── Side Chat attachment upload route ──────────────────────────────────
+  // The side-chat composer's own raw route: the File IS the body (no
+  // base64/JSON inflation, so one image is not capped at the 1 MiB JSON
+  // envelope), and the route validates name shape / type policy / size caps
+  // before the bytes reach the host attachment store. The composer then
+  // references the staged upload by an opaque id in `sidechat.prompt`.
+  registerSidechatAttachmentRoute(ctx, fence)
 
   // ── Editor save route ──────────────────────────────────────────────────
   // The document IS the body: no JSON string-escaping, so the 1 MiB JSON

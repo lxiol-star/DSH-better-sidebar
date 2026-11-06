@@ -83,8 +83,8 @@ describe('native Connection admission', () => {
     const mounted = mount(rejection)
     try {
       expect(mounted.routes.map(route => route.path)).toEqual([
-        '/sidebar/api', '/sidebar/upload', '/sidebar/write', '/sidebar/bundle',
-        '/sidebar/archive', '/sidebar/file', '/sidebar/html',
+        '/sidebar/api', '/sidebar/upload', '/sidebar/sidechat/attach', '/sidebar/write',
+        '/sidebar/bundle', '/sidebar/archive', '/sidebar/file', '/sidebar/html',
       ])
       expect(mounted.upgrades.map(route => route.path)).toEqual([
         '/sidebar/ws/agent-opens', '/sidebar/ws/fs-watch', '/sidebar/ws/sidechat',
@@ -105,7 +105,8 @@ describe('native Connection admission', () => {
         expect(input.reads(), route.path).toBe(0)
         expect(mounted.connection.requestRejection).toHaveBeenLastCalledWith(input.req)
       }
-      expect(mounted.connection.requestRejection).toHaveBeenCalledTimes(10)
+      // 8 HTTP routes + 3 WebSocket upgrades: every mount registers them here.
+      expect(mounted.connection.requestRejection).toHaveBeenCalledTimes(11)
     } finally {
       mounted.cleanup()
     }

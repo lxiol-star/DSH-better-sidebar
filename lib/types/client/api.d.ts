@@ -1,4 +1,5 @@
 import type { SidechatLiveEvent, SidechatLogEvent, SidechatModelCatalog, SidechatModelSelection, SidechatPendingInput, SidechatThreadInfo } from '../sidechat-core.ts';
+import type { SidechatAttachmentSummary, SidechatUploadedAttachment } from '../sidechat-attachment-core.ts';
 import type { SidebarCreateTeamTaskRequest, SidebarChildLiveView, SidebarSessionEvent, SidebarTeamTaskView, SidebarUpdateTeamTaskRequest } from '../context-types.ts';
 import type { WorkflowRunView } from '../workflow-runs.ts';
 import type { GitGraphOptions, GitGraphResult } from '../git-graph.ts';
@@ -441,9 +442,21 @@ export declare const api: {
     sidechatStart: (sessionId: string, question?: string) => Promise<{
         childId: string;
     }>;
-    /** Deliver one follow-up message to a Side Chat thread. */
-    sidechatPrompt: (childId: string, text: string) => Promise<{
+    /** Deliver one follow-up message to a Side Chat thread. `attachments` are
+     *  the opaque upload ids the raw attach route returned; the host resolves
+     *  them to the durable refs it staged (the client never sends a ref). */
+    sidechatPrompt: (childId: string, text: string, attachments?: readonly string[]) => Promise<{
         accepted: true;
+    }>;
+    /** Upload one composer attachment as raw bytes (no base64/JSON inflation):
+     *  the host validates name/type/size, commits it to the attachment store,
+     *  and answers the opaque staging id the prompt references. */
+    sidechatAttach: (childId: string, file: File, signal?: AbortSignal) => Promise<SidechatUploadedAttachment>;
+    /** Read one durable image attachment's bytes for a transcript thumbnail.
+     *  The reference rides the logged message; the host store verifies it. */
+    sidechatAttachment: (childId: string, attachment: SidechatAttachmentSummary) => Promise<{
+        data: string;
+        mediaType: string;
     }>;
     /** Abort a Side Chat thread's running turn (queued work is preserved). */
     sidechatCancel: (childId: string) => Promise<{
