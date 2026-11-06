@@ -442,6 +442,8 @@ export const de: Record<string, string> = {
   sideChatAttachRemove: 'Anhang entfernen',
   sideChatAttachUploading: 'Wird hochgeladen…',
   sideChatAttachFailedShort: 'Hochladen fehlgeschlagen',
+  sideChatAttachHostStale: 'DSH neu starten',
+  sideChatAttachHostStaleHint: 'Der laufende DSH-Prozess hat die Upload-Route noch nicht geladen – DSH vollständig beenden und neu starten',
   sideChatAttachFailed: 'Anhang fehlgeschlagen: {message}',
   sideChatAttachTooMany: 'Höchstens {count} Anhänge pro Nachricht',
   sideChatAttachTooLarge: 'Anhang überschreitet die Größenbeschränkung',

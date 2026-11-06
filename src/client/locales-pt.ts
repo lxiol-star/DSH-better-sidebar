@@ -439,6 +439,8 @@ export const pt: Record<string, string> = {
   sideChatAttachRemove: 'Remover anexo',
   sideChatAttachUploading: 'Enviando…',
   sideChatAttachFailedShort: 'Falha no envio',
+  sideChatAttachHostStale: 'Reiniciar o DSH',
+  sideChatAttachHostStaleHint: 'O DSH em execução ainda não carregou a rota de upload — encerre o DSH por completo e reinicie',
   sideChatAttachFailed: 'Falha no anexo: {message}',
   sideChatAttachTooMany: 'No máximo {count} anexos por mensagem',
   sideChatAttachTooLarge: 'O anexo excede o limite de tamanho',

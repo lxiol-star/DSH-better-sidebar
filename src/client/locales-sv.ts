@@ -439,6 +439,8 @@ export const sv: Record<string, string> = {
   sideChatAttachRemove: 'Ta bort bilaga',
   sideChatAttachUploading: 'Laddar upp…',
   sideChatAttachFailedShort: 'Uppladdning misslyckades',
+  sideChatAttachHostStale: 'Starta om DSH',
+  sideChatAttachHostStaleHint: 'Den körande DSH:n har inte laddat uppladdningsvägen än — stäng DSH helt och starta om',
   sideChatAttachFailed: 'Bilagan misslyckades: {message}',
   sideChatAttachTooMany: 'Högst {count} bilagor per meddelande',
   sideChatAttachTooLarge: 'Bilagan överskrider storleksgränsen',

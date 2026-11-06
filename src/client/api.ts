@@ -650,6 +650,13 @@ export const api = {
       if (error instanceof DOMException && error.name === 'AbortError') throw error
       throw new SidebarApiError('network', error instanceof Error ? error.message : String(error))
     }
+    // 404/405 here is not "bad file": this route only exists in a host half that
+    // shipped with the composer. A page reload picks up the NEW client bundle
+    // from disk while the process still runs the OLD host half, so the upload
+    // would fail with an opaque envelope error — name that cause instead.
+    if (response.status === 404 || response.status === 405) {
+      throw new SidebarApiError('host-stale', `HTTP ${response.status}`)
+    }
     return readEnvelope<SidechatUploadedAttachment>(response)
   },
   /** Read one durable image attachment's bytes for a transcript thumbnail.

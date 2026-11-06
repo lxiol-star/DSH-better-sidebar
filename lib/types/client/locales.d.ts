@@ -469,6 +469,8 @@ export declare const zh: {
     sideChatAttachRemove: string;
     sideChatAttachUploading: string;
     sideChatAttachFailedShort: string;
+    sideChatAttachHostStale: string;
+    sideChatAttachHostStaleHint: string;
     sideChatAttachFailed: string;
     sideChatAttachTooMany: string;
     sideChatAttachTooLarge: string;

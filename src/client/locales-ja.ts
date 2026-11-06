@@ -456,6 +456,8 @@ export const ja: Record<string, string> = {
   sideChatAttachRemove: '添付を削除',
   sideChatAttachUploading: 'アップロード中…',
   sideChatAttachFailedShort: 'アップロード失敗',
+  sideChatAttachHostStale: 'DSH を再起動',
+  sideChatAttachHostStaleHint: '実行中の DSH には添付アップロードの口がまだ読み込まれていません。DSH を完全に終了して再起動してください',
   sideChatAttachFailed: '添付の処理に失敗しました: {message}',
   sideChatAttachTooMany: '1 メッセージにつき添付は最大 {count} 個です',
   sideChatAttachTooLarge: '添付がサイズ上限を超えています',

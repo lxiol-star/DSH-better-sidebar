@@ -1,6 +1,8 @@
 import { type SidechatAttachmentKind } from '../sidechat-attachment-core.ts';
 /** Why one file was refused or failed to upload (the view localizes the code). */
-export type SidechatAttachmentErrorCode = 'too-many' | 'too-large' | 'invalid-name' | 'unsupported-image' | 'host' | 'network';
+export type SidechatAttachmentErrorCode = 'too-many' | 'too-large' | 'invalid-name' | 'unsupported-image'
+/** The running host half has no attach route (stale process, reload needed). */
+ | 'host-stale' | 'host' | 'network';
 /** One attachment row of the composer tray. */
 export interface QueuedSidechatAttachment {
     /** Client-local row identity (stable React key). */
@@ -17,6 +19,8 @@ export interface QueuedSidechatAttachment {
     uploadId?: string;
     /** Failure code of a row that never became sendable. */
     errorCode?: SidechatAttachmentErrorCode;
+    /** Raw reason behind that code (shown in the chip's title). */
+    errorMessage?: string;
 }
 /** One localized-refusal-style failure of the queue. */
 export interface SidechatAttachmentFailure {

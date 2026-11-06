@@ -449,6 +449,8 @@ export const fr: Record<string, string> = {
   sideChatAttachRemove: 'Retirer la pièce jointe',
   sideChatAttachUploading: 'Envoi…',
   sideChatAttachFailedShort: 'Échec de l’envoi',
+  sideChatAttachHostStale: 'Redémarrer DSH',
+  sideChatAttachHostStaleHint: 'Le processus DSH en cours n’a pas encore chargé la route d’envoi — quitter DSH complètement puis le relancer',
   sideChatAttachFailed: 'Échec de la pièce jointe : {message}',
   sideChatAttachTooMany: 'Au plus {count} pièces jointes par message',
   sideChatAttachTooLarge: 'La pièce jointe dépasse la limite de taille',

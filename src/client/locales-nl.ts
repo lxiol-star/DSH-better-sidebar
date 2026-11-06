@@ -454,6 +454,8 @@ export const nl: Record<string, string> = {
   sideChatAttachRemove: 'Bijlage verwijderen',
   sideChatAttachUploading: 'Uploaden…',
   sideChatAttachFailedShort: 'Uploaden mislukt',
+  sideChatAttachHostStale: 'DSH herstarten',
+  sideChatAttachHostStaleHint: 'De draaiende DSH heeft de uploadroute nog niet geladen — sluit DSH volledig af en start opnieuw',
   sideChatAttachFailed: 'Bijlage mislukt: {message}',
   sideChatAttachTooMany: 'Maximaal {count} bijlagen per bericht',
   sideChatAttachTooLarge: 'Bijlage overschrijdt de limiet',

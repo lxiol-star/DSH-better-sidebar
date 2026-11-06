@@ -456,6 +456,8 @@ export const tr: Record<string, string> = {
   sideChatAttachRemove: 'Eki kaldır',
   sideChatAttachUploading: 'Yükleniyor…',
   sideChatAttachFailedShort: 'Yükleme başarısız',
+  sideChatAttachHostStale: 'DSH yeniden başlatılmalı',
+  sideChatAttachHostStaleHint: 'Çalışan DSH yükleme rotasını henüz yüklemedi — DSH uygulamasını tamamen kapatıp yeniden başlatın',
   sideChatAttachFailed: 'Ek başarısız: {message}',
   sideChatAttachTooMany: 'Mesaj başına en fazla {count} ek',
   sideChatAttachTooLarge: 'Ek boyut sınırını aşıyor',

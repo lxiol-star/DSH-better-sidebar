@@ -448,6 +448,8 @@ export const ko: Record<string, string> = {
   sideChatAttachRemove: '첨부 삭제',
   sideChatAttachUploading: '업로드 중…',
   sideChatAttachFailedShort: '업로드 실패',
+  sideChatAttachHostStale: 'DSH 재시작',
+  sideChatAttachHostStaleHint: '실행 중인 DSH가 첨부 업로드 경로를 아직 로드하지 않았습니다. DSH를 완전히 종료하고 다시 시작하세요',
   sideChatAttachFailed: '첨부 실패: {message}',
   sideChatAttachTooMany: '메시지당 최대 {count}개 첨부',
   sideChatAttachTooLarge: '첨부가 크기 제한을 초과했습니다',

@@ -457,6 +457,8 @@ export const ar: Record<string, string> = {
   sideChatAttachRemove: 'إزالة المرفق',
   sideChatAttachUploading: 'جارٍ الرفع…',
   sideChatAttachFailedShort: 'فشل الرفع',
+  sideChatAttachHostStale: 'أعد تشغيل DSH',
+  sideChatAttachHostStaleHint: 'لم يحمّل DSH قيد التشغيل مسار الرفع بعد — أغلق DSH تمامًا ثم أعد تشغيله',
   sideChatAttachFailed: 'فشل المرفق: {message}',
   sideChatAttachTooMany: 'بحد أقصى {count} مرفقات لكل رسالة',
   sideChatAttachTooLarge: 'المرفق يتجاوز حد الحجم',

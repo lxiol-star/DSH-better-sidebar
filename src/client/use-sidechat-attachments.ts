@@ -32,6 +32,8 @@ export type SidechatAttachmentErrorCode =
   | 'too-large'
   | 'invalid-name'
   | 'unsupported-image'
+  /** The running host half has no attach route (stale process, reload needed). */
+  | 'host-stale'
   | 'host'
   | 'network'
 
@@ -51,6 +53,8 @@ export interface QueuedSidechatAttachment {
   uploadId?: string
   /** Failure code of a row that never became sendable. */
   errorCode?: SidechatAttachmentErrorCode
+  /** Raw reason behind that code (shown in the chip's title). */
+  errorMessage?: string
 }
 
 /** One localized-refusal-style failure of the queue. */
@@ -84,6 +88,7 @@ function failureOf(error: unknown): SidechatAttachmentFailure {
   if (error instanceof SidebarApiError) {
     if (error.code === 'too-large') return { code: 'too-large' }
     if (error.code === 'network') return { code: 'network', message: error.message }
+    if (error.code === 'host-stale') return { code: 'host-stale', message: error.message }
     return { code: 'host', message: error.message }
   }
   return { code: 'host', message: error instanceof Error ? error.message : String(error) }
@@ -159,7 +164,7 @@ export function useSidechatAttachmentQueue(childId: string | undefined): Sidecha
         })
       } catch (error) {
         const failed = failureOf(error)
-        updateItem(id, { status: 'error', errorCode: failed.code })
+        updateItem(id, { status: 'error', errorCode: failed.code, errorMessage: failed.message })
         if (mountedRef.current) setFailure(failed)
       }
     })

@@ -173,7 +173,9 @@ export function ComposerAttachmentTray(props: {
             css.sidechatAttachmentChip,
             item.status === 'error' && css.sidechatAttachmentChipError,
           )}
-          title={item.name}
+          title={item.errorMessage === undefined
+            ? item.name
+            : `${item.name} — ${item.errorMessage}`}
         >
           {item.previewUrl === undefined
             ? (
@@ -188,7 +190,9 @@ export function ComposerAttachmentTray(props: {
               {item.status === 'uploading'
                 ? t('sideChatAttachUploading')
                 : item.status === 'error'
-                  ? t('sideChatAttachFailedShort')
+                  ? item.errorCode === 'host-stale'
+                    ? t('sideChatAttachHostStale')
+                    : t('sideChatAttachFailedShort')
                   : formatAttachmentSize(item.bytes)}
             </span>
           </span>

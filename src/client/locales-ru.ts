@@ -454,6 +454,8 @@ export const ru: Record<string, string> = {
   sideChatAttachRemove: 'Удалить вложение',
   sideChatAttachUploading: 'Загрузка…',
   sideChatAttachFailedShort: 'Не удалось загрузить',
+  sideChatAttachHostStale: 'Перезапустите DSH',
+  sideChatAttachHostStaleHint: 'Запущенный DSH ещё не загрузил маршрут загрузки — полностью закройте и перезапустите DSH',
   sideChatAttachFailed: 'Ошибка вложения: {message}',
   sideChatAttachTooMany: 'Не более {count} вложений на сообщение',
   sideChatAttachTooLarge: 'Вложение превышает ограничение размера',

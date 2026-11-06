@@ -456,6 +456,8 @@ export const hi: Record<string, string> = {
   sideChatAttachRemove: 'अटैचमेंट हटाएँ',
   sideChatAttachUploading: 'अपलोड हो रहा है…',
   sideChatAttachFailedShort: 'अपलोड विफल',
+  sideChatAttachHostStale: 'DSH पुनः आरंभ करें',
+  sideChatAttachHostStaleHint: 'चल रहे DSH ने अपलोड रूट अभी लोड नहीं किया — DSH पूरी तरह बंद कर के फिर शुरू करें',
   sideChatAttachFailed: 'अटैचमेंट विफल: {message}',
   sideChatAttachTooMany: 'प्रति संदेश अधिकतम {count} अटैचमेंट',
   sideChatAttachTooLarge: 'अटैचमेंट आकार सीमा से बड़ा है',

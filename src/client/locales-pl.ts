@@ -458,6 +458,8 @@ export const pl: Record<string, string> = {
   sideChatAttachRemove: 'Usuń załącznik',
   sideChatAttachUploading: 'Wysyłanie…',
   sideChatAttachFailedShort: 'Wysyłanie nie powiodło się',
+  sideChatAttachHostStale: 'Uruchom ponownie DSH',
+  sideChatAttachHostStaleHint: 'Działający DSH nie wczytał jeszcze trasy wysyłania — zamknij DSH całkowicie i uruchom ponownie',
   sideChatAttachFailed: 'Załącznik nie powiódł się: {message}',
   sideChatAttachTooMany: 'Maksymalnie {count} załączników na wiadomość',
   sideChatAttachTooLarge: 'Załącznik przekracza limit rozmiaru',

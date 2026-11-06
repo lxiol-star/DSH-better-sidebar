@@ -447,6 +447,8 @@ export const it: Record<string, string> = {
   sideChatAttachRemove: 'Rimuovi allegato',
   sideChatAttachUploading: 'Caricamento…',
   sideChatAttachFailedShort: 'Caricamento non riuscito',
+  sideChatAttachHostStale: 'Riavvia DSH',
+  sideChatAttachHostStaleHint: 'Il DSH in esecuzione non ha ancora caricato la rotta di upload — chiudi del tutto e riavvia',
   sideChatAttachFailed: 'Allegato non riuscito: {message}',
   sideChatAttachTooMany: 'Al massimo {count} allegati per messaggio',
   sideChatAttachTooLarge: 'L’allegato supera il limite di dimensione',

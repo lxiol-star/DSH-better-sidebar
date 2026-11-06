@@ -456,6 +456,8 @@ export const th: Record<string, string> = {
   sideChatAttachRemove: 'ลบไฟล์แนบ',
   sideChatAttachUploading: 'กำลังอัปโหลด…',
   sideChatAttachFailedShort: 'อัปโหลดไม่สำเร็จ',
+  sideChatAttachHostStale: 'รีสตาร์ต DSH',
+  sideChatAttachHostStaleHint: 'DSH ที่รันอยู่ยังไม่ได้โหลดเส้นทางอัปโหลด — ปิด DSH ให้สนิทแล้วเปิดใหม่',
   sideChatAttachFailed: 'ไฟล์แนบผิดพลาด: {message}',
   sideChatAttachTooMany: 'แนบได้สูงสุด {count} ไฟล์ต่อข้อความ',
   sideChatAttachTooLarge: 'ไฟล์แนบมีขนาดเกินขีดจำกัด',

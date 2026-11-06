@@ -359,6 +359,8 @@ function attachmentFailureText(failure: SidechatAttachmentFailure | null): strin
       return t('sideChatAttachInvalidName')
     case 'unsupported-image':
       return t('sideChatAttachUnsupportedImage')
+    case 'host-stale':
+      return t('sideChatAttachHostStaleHint')
     case 'network':
     case 'host':
       return t('sideChatAttachFailed', { message: failure.message ?? '' })

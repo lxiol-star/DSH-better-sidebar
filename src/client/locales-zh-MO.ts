@@ -471,6 +471,8 @@ export const zhMO: Record<string, string> = {
   sideChatAttachRemove: '移除附件',
   sideChatAttachUploading: '上傳中…',
   sideChatAttachFailedShort: '上傳失敗',
+  sideChatAttachHostStale: '需重啟 DSH',
+  sideChatAttachHostStaleHint: '附件介面還沒被執行中的 DSH 載入：完全結束並重啟 DSH 後即可上傳',
   sideChatAttachFailed: '附件處理失敗：{message}',
   sideChatAttachTooMany: '每則訊息最多 {count} 個附件',
   sideChatAttachTooLarge: '附件超過大小上限',

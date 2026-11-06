@@ -454,6 +454,8 @@ export const id: Record<string, string> = {
   sideChatAttachRemove: 'Hapus lampiran',
   sideChatAttachUploading: 'Mengunggah…',
   sideChatAttachFailedShort: 'Unggahan gagal',
+  sideChatAttachHostStale: 'Mulai ulang DSH',
+  sideChatAttachHostStaleHint: 'DSH yang berjalan belum memuat rute unggah — tutup DSH sepenuhnya lalu jalankan lagi',
   sideChatAttachFailed: 'Lampiran gagal: {message}',
   sideChatAttachTooMany: 'Maksimal {count} lampiran per pesan',
   sideChatAttachTooLarge: 'Lampiran melebihi batas ukuran',

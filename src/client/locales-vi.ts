@@ -456,6 +456,8 @@ export const vi: Record<string, string> = {
   sideChatAttachRemove: 'Xóa tệp đính kèm',
   sideChatAttachUploading: 'Đang tải lên…',
   sideChatAttachFailedShort: 'Tải lên thất bại',
+  sideChatAttachHostStale: 'Khởi động lại DSH',
+  sideChatAttachHostStaleHint: 'DSH đang chạy chưa nạp tuyến tải lên — thoát hẳn DSH rồi khởi động lại',
   sideChatAttachFailed: 'Tệp đính kèm lỗi: {message}',
   sideChatAttachTooMany: 'Tối đa {count} tệp đính kèm mỗi tin nhắn',
   sideChatAttachTooLarge: 'Tệp đính kèm vượt quá giới hạn kích thước',
