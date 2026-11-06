@@ -25,6 +25,13 @@
 import type { DiffHunk, ReadBlockLine } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { SidebarHistoryEntry } from '../context-types.ts'
 import { isContextInjectionMessage, SIDE_BOUNDARY_PROMPT } from '../sidechat-core.ts'
+import {
+  attachmentSummariesOf,
+  isInlineContextBlock,
+  isTextOnlyImageNote,
+  SIDECHAT_INLINE_CONTEXT_PREFIX,
+  type SidechatAttachmentSummary,
+} from '../sidechat-attachment-core.ts'
 
 /**
  * Structured render payload for a tool row that maps onto one of the host's
@@ -53,7 +60,18 @@ export type SidechatTranscriptRow =
   /** `messageId` is the durable message identity the log records on the event
    *  (`data.id`); the view uses it to dedupe a still-pending inbox row against
    *  the durable row the claim eventually writes. Older logs may lack it. */
-  | { kind: 'user'; seq: number; text: string; messageId?: string }
+  | {
+    kind: 'user'
+    seq: number
+    text: string
+    messageId?: string
+    /** Durable attachments the message carried (absent on plain text). */
+    attachments?: SidechatAttachmentSummary[]
+    /** Inlined text-file bodies, rendered as a collapsed row (absent when none). */
+    context?: string
+    /** True when a text-only model could not receive the message's images. */
+    note?: boolean
+  }
   /** A context injection (the side boundary prompt + the parked in-progress
    *  snapshot, or any plugin-sourced context): rendered as one collapsible
    *  row, never as a user bubble. */
@@ -118,6 +136,50 @@ export function blockText(content: readonly unknown[]): string {
   }
   const text = parts.join('\n\n')
   return text === '' ? '…' : text
+}
+
+/**
+ * Split one user message's content into the parts the transcript renders:
+ * the user's own prose, the durable attachment chips, the generated inline
+ * file context (collapsed, never dumped into the bubble), and the generated
+ * text-only-image note (localized by the view).
+ *
+ * @param content - the `user/message` event's `data.content`.
+ * @returns the four parts; attachments/context are empty-safe.
+ */
+export interface SidechatUserContent {
+  text: string
+  attachments: SidechatAttachmentSummary[]
+  context: string | null
+  note: boolean
+}
+
+export function userContentOf(content: unknown): SidechatUserContent {
+  const blocks = Array.isArray(content) ? content : []
+  const text: string[] = []
+  const context: string[] = []
+  let note = false
+  for (const block of blocks) {
+    if (block === null || typeof block !== 'object') continue
+    const candidate = block as { type?: unknown; text?: unknown }
+    if (candidate.type !== 'text' || typeof candidate.text !== 'string') continue
+    if (isInlineContextBlock(candidate.text)) {
+      context.push(candidate.text.slice(SIDECHAT_INLINE_CONTEXT_PREFIX.length))
+      continue
+    }
+    if (isTextOnlyImageNote(candidate.text)) {
+      note = true
+      continue
+    }
+    text.push(candidate.text)
+  }
+  const attachments = attachmentSummariesOf(blocks)
+  return {
+    text: text.join('\n\n'),
+    attachments,
+    context: context.length === 0 ? null : context.join('\n\n'),
+    note,
+  }
 }
 
 /** Cap for a tool row's one-line argument summary (display only). */
@@ -464,7 +526,16 @@ export function transcriptRows(entries: readonly SidebarHistoryEntry[], prev?: r
           rows.push({ kind: 'injection', seq: event.seq, text })
           break
         }
-        rows.push({ kind: 'user', seq: event.seq, text, ...(messageId !== undefined ? { messageId } : {}) })
+        const userContent = userContentOf(data.content)
+        rows.push({
+          kind: 'user',
+          seq: event.seq,
+          text: userContent.text,
+          ...(messageId !== undefined ? { messageId } : {}),
+          ...(userContent.attachments.length === 0 ? {} : { attachments: userContent.attachments }),
+          ...(userContent.context === null ? {} : { context: userContent.context }),
+          ...(userContent.note ? { note: true } : {}),
+        })
         break
       }
       case 'assistant/live-chunk': {
@@ -588,6 +659,9 @@ function rowsEqual(a: SidechatTranscriptRow, b: SidechatTranscriptRow): boolean 
     case 'user': {
       const other = b as typeof a
       return a.text === other.text && a.messageId === other.messageId
+        && a.context === other.context && a.note === other.note
+        && (a.attachments ?? []).map(entry => entry.attachmentId).join('\u0000')
+          === (other.attachments ?? []).map(entry => entry.attachmentId).join('\u0000')
     }
     case 'injection':
     case 'error': {

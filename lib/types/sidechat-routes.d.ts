@@ -90,6 +90,13 @@ export interface SidechatRoutes {
         accepted: true;
         selection: SidechatModelSelection;
     }>;
+    /** Read one durable image attachment's bytes for a transcript thumbnail.
+     *  The reference rides straight from the logged message; the host store
+     *  verifies it before answering. */
+    'sidechat.attachment'(payload: unknown): Promise<{
+        data: string;
+        mediaType: string;
+    }>;
 }
 /** Build the Side Chat routes (all optional services degrade to a wire
  *  error the tab surfaces inline). The record keys are the FULL wire method

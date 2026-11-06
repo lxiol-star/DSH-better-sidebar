@@ -68,6 +68,17 @@ import {
 import type { AssistantLiveBuffer } from './assistant-live.ts'
 import { requireString, SidebarError } from './wire.ts'
 import { readPersistedSession } from './session-store.ts'
+import {
+  imageInputSupportedOf,
+  planSidechatPrompt,
+  type SidechatPlanAttachment,
+} from './sidechat-attachment-core.ts'
+import {
+  dropStagedSidechatAttachments,
+  readSidechatImageAttachment,
+  resolveStagedSidechatAttachments,
+  type StagedSidechatAttachment,
+} from './sidechat-attachment-host.ts'
 
 /**
  * The plugin's producer-owned message source kind. Message sources are a
@@ -143,6 +154,10 @@ export interface SidechatRoutes {
    *  request through the agent-scoped selection the host installs for its
    *  composer. */
   'sidechat.model'(payload: unknown): Promise<{ accepted: true; selection: SidechatModelSelection }>
+  /** Read one durable image attachment's bytes for a transcript thumbnail.
+   *  The reference rides straight from the logged message; the host store
+   *  verifies it before answering. */
+  'sidechat.attachment'(payload: unknown): Promise<{ data: string; mediaType: string }>
 }
 
 /** Timeout guarding the create call (the registry detaches it before the
@@ -181,13 +196,16 @@ interface SidebarModelCatalogService {
 }
 
 /** The host LLM service's structural face: the same call-config resolution the
- *  controller's own `selectModel` validates with. */
+ *  controller's own `selectModel` validates with, plus the exact-model metadata
+ *  query the prompt's image capability check reads (the host's own prompt
+ *  admission uses the same call). */
 interface SidebarLlmService {
   resolveCallConfig?(request: {
     provider: string
     model: string
     reasoningEffort?: ReturnType<typeof ReasoningEffortId>
   }): Promise<unknown>
+  resolveModelInfo?(provider: string, model: string, signal?: AbortSignal): Promise<unknown>
 }
 
 /** Resolve the parent's preset and build the child's composition setup
@@ -253,12 +271,52 @@ function admitFollowup(agent: Agent, blocks: ContentBlock[]): void {
  * is structural; its text still opens with SIDE_BOUNDARY_PREFIX, keeping
  * boundaryDelivered intact.
  */
-function admitFirstContact(agent: Agent, injectionText: string, question: string): void {
+function admitFirstContact(agent: Agent, injectionText: string, question: ContentBlock[]): void {
   agent.inject(createUserMessage({
     content: textPrompt(injectionText),
     source: { kind: SIDE_INJECTION_SOURCE_KIND },
   }))
-  admitFollowup(agent, textPrompt(question))
+  admitFollowup(agent, question)
+}
+
+/** One staged upload as the prompt plan sees it (null for an image entry that
+ *  somehow lost its durable reference; that never happens on the upload path). */
+function planAttachmentOf(staged: StagedSidechatAttachment): SidechatPlanAttachment | null {
+  if (staged.kind === 'image') {
+    return staged.image === undefined
+      ? null
+      : { kind: 'image', name: staged.name, bytes: staged.bytes, ref: staged.image }
+  }
+  return {
+    kind: 'file',
+    name: staged.name,
+    bytes: staged.bytes,
+    ...(staged.file === undefined ? {} : { ref: staged.file }),
+    ...(staged.inline === undefined ? {} : { inline: staged.inline }),
+  }
+}
+
+/**
+ * Whether the thread's EFFECTIVE model can receive images. Resolved through
+ * the host LLM service's own exact-model metadata query — the same call the
+ * controller's prompt admission makes — with every failure read as "unknown"
+ * (the image block then rides the request and the host's own projector /
+ * adapter decides, exactly like the native composer).
+ */
+async function imageInputSupportedFor(ctx: Context, agent: Agent): Promise<boolean> {
+  const selection = selectionOf(agent)
+  if (selection === undefined) return true
+  const llm = ctx.get('llm') as SidebarLlmService | undefined
+  if (llm?.resolveModelInfo === undefined) return true
+  try {
+    const info = await llm.resolveModelInfo(selection.provider, selection.model)
+    const modalities = info === null || typeof info !== 'object'
+      ? undefined
+      : (info as { inputModalities?: unknown }).inputModalities
+    return imageInputSupportedOf(modalities)
+  } catch {
+    return true
+  }
 }
 
 /** The live thread agent, or undefined (cold — the caller resumes). */
@@ -766,7 +824,7 @@ export function buildSidechatApi(ctx: Context, live?: AssistantLiveBuffer): Side
       } else {
         const promptParts = [SIDE_BOUNDARY_PROMPT]
         if (inheritance.snapshot !== null) promptParts.push(inheritance.snapshot)
-        admitFirstContact(handle.agent, promptParts.join('\n\n'), question)
+        admitFirstContact(handle.agent, promptParts.join('\n\n'), textPrompt(question))
         pinTitle(sideLabel(question))
       }
       return { childId }
@@ -774,16 +832,39 @@ export function buildSidechatApi(ctx: Context, live?: AssistantLiveBuffer): Side
 
     'sidechat.prompt': async (payload: unknown) => {
       const childId = requireString(payload, 'childId')
-      const text = requireString(payload, 'text').trim()
-      if (text === '') {
-        throw new SidebarError('bad-request', 'text is required')
+      const rawText = (payload as { text?: unknown }).text
+      if (rawText !== undefined && typeof rawText !== 'string') {
+        throw new SidebarError('bad-request', 'text must be a string')
       }
+      const text = (rawText ?? '').trim()
+      // Uploaded attachments ride by opaque uploadId (never by a client-built
+      // reference): the staging table names the durable objects this thread
+      // uploaded, so a forged reference can never cite foreign bytes.
+      const staged = resolveStagedSidechatAttachments(childId, (payload as { attachments?: unknown }).attachments)
+      if (text === '' && staged.length === 0) {
+        throw new SidebarError('bad-request', 'text or an attachment is required')
+      }
+      const attachments = staged
+        .map(planAttachmentOf)
+        .filter((entry): entry is SidechatPlanAttachment => entry !== null)
       // Cold thread: resume the persisted session under its recorded
       // composition, sweep the inherited ghosts, then deliver the follow-up.
       const agent = await ensureLiveThread(ctx, childId)
+      const plan = planSidechatPrompt({
+        text,
+        attachments,
+        // Only an EXPLICIT text-only model declaration degrades; every other
+        // route keeps the image block (same rule as the host's prompt path).
+        imageInputSupported: attachments.some(entry => entry.kind === 'image')
+          ? await imageInputSupportedFor(ctx, agent)
+          : true,
+      })
+      if (plan.content.length === 0) {
+        throw new SidebarError('bad-request', 'the message carries no content')
+      }
       if (boundaryDelivered(agent.session.snapshotEvents() as unknown as readonly SidechatLogEvent[])
         || boundaryPending(agent)) {
-        admitFollowup(agent, textPrompt(text))
+        admitFollowup(agent, plan.content)
       } else {
         // First message of an immediately-created thread: it carries the
         // boundary (+ the snapshot parked at creation, if still around)
@@ -792,11 +873,13 @@ export function buildSidechatApi(ctx: Context, live?: AssistantLiveBuffer): Side
         const snapshot = pendingSnapshots.get(childId)
         pendingSnapshots.delete(childId)
         if (snapshot !== undefined) parts.push(snapshot)
-        admitFirstContact(agent, parts.join('\n\n'), text)
+        admitFirstContact(agent, parts.join('\n\n'), plan.content)
         const titles = ctx.get('sessionTitle') as SidebarSessionTitleService | undefined
         if (titles !== undefined) {
           try {
-            titles.rename(agent.session, sideLabel(text))
+            // An attachment-only first message still earns a label: its first
+            // attachment name is the honest one ("Side: notes.md").
+            titles.rename(agent.session, sideLabel(text === '' ? (staged[0]?.name ?? 'attachments') : text))
           } catch {
             // Keep the placeholder title; the thread stays usable.
           }
@@ -818,6 +901,7 @@ export function buildSidechatApi(ctx: Context, live?: AssistantLiveBuffer): Side
       const childId = requireString(payload, 'childId')
       pendingSnapshots.delete(childId)
       threadModelRefs.delete(childId)
+      dropStagedSidechatAttachments(childId)
       const dispose = threadDisposers.get(childId)
       if (dispose !== undefined) {
         threadDisposers.delete(childId)
@@ -903,6 +987,14 @@ export function buildSidechatApi(ctx: Context, live?: AssistantLiveBuffer): Side
         return { accepted: true as const, removed: queued }
       }
       return { accepted: true as const, removed: agent.inbox.remove(rawId as MessageId) ? 1 : 0 }
+    },
+
+    'sidechat.attachment': async (payload: unknown) => {
+      // The thread scope is required (the client always has it); the bytes
+      // are addressed by the durable reference the transcript row carries,
+      // and the store verifies that reference before answering.
+      requireString(payload, 'childId')
+      return readSidechatImageAttachment(ctx, (payload as { attachment?: unknown }).attachment)
     },
 
     'sidechat.models': async () => modelCatalogOf(ctx),

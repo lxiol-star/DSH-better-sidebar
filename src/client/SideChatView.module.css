@@ -418,6 +418,200 @@
   animation: sidechatSweep 2.6s linear infinite;
 }
 
+/* ── attachments: composer tray + sent chips ──────────────────────────
+ * Chips read as compact capsules on the bubble/input surface: the image thumb
+ * is the row's identity, the file glyph comes from the host's own artwork, and
+ * every paint value below is a theme token (skin contract). */
+.sidechatAttachmentTray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 2px 0 4px;
+}
+
+.sidechatAttachmentChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 220px;
+  padding: 3px 4px 3px 3px;
+  border: 1px solid var(--dsw-alias-border-l2-darkmode-thin, var(--dsw-alias-hairline));
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-base);
+}
+
+.sidechatAttachmentChipError {
+  border-color: var(--dsw-alias-danger);
+}
+
+.sidechatAttachmentThumb {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  object-fit: cover;
+}
+
+.sidechatAttachmentIcon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.sidechatAttachmentMeta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sidechatAttachmentName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: var(--dsw-font-xxs-13);
+  color: var(--dsw-alias-label-primary);
+}
+
+.sidechatAttachmentSize {
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.sidechatAttachmentRemove {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  cursor: pointer;
+}
+
+.sidechatAttachmentRemove:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+/* The drop target: the composer card outlines itself while files hover it. */
+.sidechatComposerDrag {
+  border-color: var(--dsw-alias-accent);
+}
+
+.sidechatComposerDropHint {
+  padding: 2px 0;
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-label-secondary);
+}
+
+/* Sent-message chips: images render as small preview tiles, files as one-line
+ * capsules. Both wrap inside the user bubble. */
+.sidechatSentAttachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.sidechatSentAttachment {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 220px;
+  margin: 0;
+  padding: 3px 8px 3px 3px;
+  border: 1px solid var(--dsw-alias-border-l2-darkmode-thin, var(--dsw-alias-hairline));
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-base);
+}
+
+.sidechatSentAttachmentThumb {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  object-fit: cover;
+  cursor: zoom-in;
+}
+
+.sidechatSentAttachmentPending {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.sidechatSentAttachmentIcon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidechatSentAttachmentName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: var(--dsw-font-xxs-13);
+  color: var(--dsw-alias-label-primary);
+}
+
+.sidechatSentAttachmentSize {
+  flex: none;
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.sidechatSentAttachmentCaption {
+  min-width: 0;
+  max-width: 140px;
+}
+
+/* A model that cannot take images still shows the attachment; this line says
+ * the picture did not ride the request (the durable ref survives). */
+.sidechatAttachmentNote {
+  margin-top: 4px;
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-label-tertiary);
+}
+
+/* Inlined text-file bodies live in a collapsed row under the bubble. */
+.sidechatUserContext {
+  margin-top: 4px;
+  align-self: stretch;
+}
+
+.sidechatAttachmentContextBody {
+  margin: 0;
+  max-height: 220px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: var(--dsw-font-xxs-12);
+  font-family: var(--dsw-font-mono);
+  color: var(--dsw-alias-label-secondary);
+}
+
+.sidechatEchoAttachments {
+  font: var(--dsw-font-xxs-12);
+  color: var(--dsw-alias-label-tertiary);
+}
+
 /* ── composer (capsule card, InputBar-aligned) ──────────────────────── */
 .sidechatComposer {
   flex: none;

@@ -908,8 +908,8 @@ describe('sidechat.events pending queue', () => {
     const api = buildSidechatApi(ctxWith(services))
     const result = await api['sidechat.events']({ childId: 'child' })
     expect(result.pending).toEqual([
-      { id: 's1', target: 'next-step', text: 'steering' },
-      { id: 't1', target: 'next-turn', text: 'queued turn' },
+      { id: 's1', target: 'next-step', text: 'steering', attachments: [] },
+      { id: 't1', target: 'next-turn', text: 'queued turn', attachments: [] },
     ])
   })
 

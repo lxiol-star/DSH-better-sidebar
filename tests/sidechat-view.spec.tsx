@@ -22,6 +22,10 @@ import { SideChatView } from '../src/client/SideChatView.tsx'
 import { attachLocale } from '../src/client/locales.ts'
 import type { Context, SidebarSessionList } from '../src/context-types.ts'
 import type { SidebarTab } from '../src/client/state.ts'
+import {
+  SIDECHAT_INLINE_CONTEXT_PREFIX,
+  textOnlyImageNote,
+} from '../src/sidechat-attachment-core.ts'
 
 setupReactAct()
 
@@ -207,6 +211,12 @@ let startCalls = 0
 let promptHold: Promise<void> | null = null
 /** Non-null to make `sidechat.prompt` answer a failed envelope. */
 let promptError: string | null = null
+/** Uploads the raw attach route received in the current test. */
+let attachCalls: { name: string, type: string }[] = []
+/** Prompts the view sent (payloads carrying text + attachment ids). */
+let promptCalls: Record<string, unknown>[] = []
+/** Whether the transcript/attachment byte read should fail. */
+let attachmentReadFails = false
 
 /** EVENTS with the durable user message carrying an identity (dedupe cases). */
 function eventsWithUserId(id: string, text?: string): unknown[] {
@@ -246,11 +256,55 @@ beforeEach(() => {
   startCalls = 0
   promptHold = null
   promptError = null
+  attachCalls = []
+  promptCalls = []
+  attachmentReadFails = false
+  // jsdom has no object-URL implementation; the tray/transcript only need a
+  // stable unique string back from it.
+  Object.defineProperty(URL, 'createObjectURL', {
+    value: vi.fn(() => 'blob:preview'),
+    configurable: true,
+    writable: true,
+  })
+  Object.defineProperty(URL, 'revokeObjectURL', {
+    value: vi.fn(),
+    configurable: true,
+    writable: true,
+  })
   vi.stubGlobal('fetch', async (url: string | URL, init?: RequestInit) => {
-    const method = String(url).split('/').pop()
-    const payload: Record<string, unknown> = init?.body === undefined
-      ? {}
-      : JSON.parse(String(init.body)) as Record<string, unknown>
+    const method = String(url).split('?')[0]?.split('/').pop()
+    const rawBody = init?.body
+    const payload: Record<string, unknown> = typeof rawBody === 'string' && rawBody !== ''
+      ? JSON.parse(rawBody) as Record<string, unknown>
+      : {}
+    if (method === 'attach') {
+      const name = new URL(String(url), 'http://x').searchParams.get('name') ?? 'file'
+      const type = rawBody instanceof File ? rawBody.type : ''
+      attachCalls.push({ name, type })
+      const image = /\.(png|jpe?g|webp|gif)$/i.test(name)
+      return jsonResponse({
+        ok: true,
+        value: {
+          uploadId: `up-${attachCalls.length}`,
+          kind: image ? 'image' : 'file',
+          name,
+          bytes: rawBody instanceof File ? rawBody.size : 0,
+          ...(image
+            ? { mediaType: 'image/png', width: 4, height: 4 }
+            : { inlineChars: 3 }),
+        },
+      })
+    }
+    if (method === 'sidechat.attachment') {
+      if (attachmentReadFails) {
+        return {
+          ok: false,
+          status: 500,
+          json: async () => ({ ok: false, error: { code: 'internal', message: 'boom' } }),
+        } as unknown as Response
+      }
+      return jsonResponse({ ok: true, value: { data: 'AQID', mediaType: 'image/png' } })
+    }
     if (method === 'sidechat.events') {
       eventsPulls += 1
       return jsonResponse({ ok: true, value: { events: eventsValue, live: [], pending: pendingValue } })
@@ -272,6 +326,7 @@ beforeEach(() => {
       return jsonResponse({ ok: true, value: { accepted: true, removed: 1 } })
     }
     if (method === 'sidechat.prompt') {
+      promptCalls.push(payload)
       if (promptError !== null) {
         return {
           ok: false,
@@ -698,6 +753,196 @@ describe('SideChatView queue, echo and model picker', () => {
     expect(items).toHaveLength(1)
     expect(items[0]?.disabled).toBe(true)
     expect(items[0]?.textContent).toContain('继承主对话')
+    unmount()
+  })
+})
+
+describe('SideChatView attachments', () => {
+  /** One picker/drop File as the browser would hand it over. */
+  function fileOf(name: string, type: string, body = 'hello'): File {
+    return new File([body], name, { type })
+  }
+
+  /** Deliver files through the composer's hidden picker input. */
+  async function pickFiles(container: HTMLElement, files: File[]): Promise<void> {
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]')
+    if (input === null) throw new Error('the composer file picker is missing')
+    Object.defineProperty(input, 'files', { value: files, configurable: true })
+    await act(async () => {
+      input.dispatchEvent(new Event('change', { bubbles: true }))
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+  }
+
+  /** The composer tray's chip names (the chips are the only rows there). */
+  function trayNames(container: HTMLElement): string[] {
+    const tray = container.querySelector('[class*="sidechatAttachmentTray"]')
+    if (tray === null) return []
+    return [...tray.querySelectorAll('[class*="sidechatAttachmentName"]')].map(node => node.textContent ?? '')
+  }
+
+  async function send(container: HTMLElement): Promise<void> {
+    const button = container.querySelector<HTMLButtonElement>('button[aria-label="发送"]')
+    if (button === null) throw new Error('the send button is missing')
+    await act(async () => {
+      button.click()
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+  }
+
+  it('renders the attach control in the composer and uploads a picked file', async () => {
+    const { container, unmount } = renderRoot(createElement(SideChatView, viewProps(makeCtx(threadStore()))))
+    await act(async () => {})
+    const attach = container.querySelector<HTMLButtonElement>('button[aria-label="添加附件"]')
+    expect(attach).not.toBeNull()
+    await pickFiles(container, [fileOf('notes.md', 'text/markdown')])
+    expect(attachCalls).toEqual([{ name: 'notes.md', type: 'text/markdown' }])
+    expect(trayNames(container)).toEqual(['notes.md'])
+    unmount()
+  })
+
+  it('sends the ready upload ids with the prompt and clears the tray', async () => {
+    const { container, unmount } = renderRoot(createElement(SideChatView, viewProps(makeCtx(threadStore()))))
+    await act(async () => {})
+    await pickFiles(container, [fileOf('shot.png', 'image/png')])
+    // Uploading is a one-tick promise chain; flush it.
+    await act(async () => { await Promise.resolve() })
+    typeComposer(container, 'what is this?')
+    await send(container)
+    expect(promptCalls).toHaveLength(1)
+    expect(promptCalls[0]).toMatchObject({ childId: 't1', text: 'what is this?', attachments: ['up-1'] })
+    expect(trayNames(container)).toEqual([])
+    unmount()
+  })
+
+  it('removes an attachment before sending so the prompt carries none', async () => {
+    const { container, unmount } = renderRoot(createElement(SideChatView, viewProps(makeCtx(threadStore()))))
+    await act(async () => {})
+    await pickFiles(container, [fileOf('notes.md', 'text/markdown')])
+    const remove = container.querySelector<HTMLButtonElement>('button[aria-label="移除附件"]')
+    expect(remove).not.toBeNull()
+    await act(async () => { remove?.click() })
+    expect(trayNames(container)).toEqual([])
+    typeComposer(container, 'plain question')
+    await send(container)
+    expect(promptCalls).toHaveLength(1)
+    expect(promptCalls[0]).not.toHaveProperty('attachments')
+    unmount()
+  })
+
+  it('accepts a pasted image and a dropped file', async () => {
+    const { container, unmount } = renderRoot(createElement(SideChatView, viewProps(makeCtx(threadStore()))))
+    await act(async () => {})
+    const field = container.querySelector('textarea')
+    if (field === null) throw new Error('the composer is missing')
+    const pasted = fileOf('screenshot.png', 'image/png')
+    const paste = new Event('paste', { bubbles: true, cancelable: true })
+    Object.defineProperty(paste, 'clipboardData', {
+      value: { items: [{ kind: 'file', getAsFile: () => pasted }] },
+      configurable: true,
+    })
+    await act(async () => {
+      field.dispatchEvent(paste)
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+    expect(attachCalls).toEqual([{ name: 'screenshot.png', type: 'image/png' }])
+
+    const composer = field.parentElement
+    if (composer === null) throw new Error('the composer box is missing')
+    const dropped = fileOf('notes.txt', 'text/plain')
+    const drop = new Event('drop', { bubbles: true, cancelable: true })
+    Object.defineProperty(drop, 'dataTransfer', {
+      value: { files: [dropped], types: ['Files'] },
+      configurable: true,
+    })
+    await act(async () => {
+      composer.dispatchEvent(drop)
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+    expect(attachCalls.map(call => call.name)).toEqual(['screenshot.png', 'notes.txt'])
+    expect(trayNames(container)).toEqual(['screenshot.png', 'notes.txt'])
+    unmount()
+  })
+
+  it('degrades a failed thumbnail read to the glyph placeholder without crashing', async () => {
+    attachmentReadFails = true
+    eventsValue = [
+      { type: 'session/end-seed', seq: 0, time: 0, data: {} },
+      {
+        type: 'user/message',
+        seq: 1,
+        time: 1_000,
+        surfaceOp: 'append',
+        data: {
+          source: { kind: 'user' },
+          content: [{
+            type: 'image',
+            attachment: { attachmentId: 'sha256:i', mediaType: 'image/png', bytes: 4, width: 4, height: 4, name: 'shot.png' },
+          }],
+        },
+      },
+    ]
+    const { container, unmount } = renderRoot(createElement(SideChatView, viewProps(makeCtx(threadStore()))))
+    await act(async () => {})
+    await act(async () => {
+      for (let turn = 0; turn < 8; turn += 1) await Promise.resolve()
+    })
+    expect(container.querySelector('img')).toBeNull()
+    expect(container.querySelector('[class*="sidechatSentAttachmentPending"]')).not.toBeNull()
+    expect(container.textContent ?? '').toContain('shot.png')
+    unmount()
+  })
+
+  it('renders durable file/image chips, the inline-context row, and the text-only note', async () => {
+    eventsValue = [
+      { type: 'session/end-seed', seq: 0, time: 0, data: {} },
+      {
+        type: 'user/message',
+        seq: 1,
+        time: 1_000,
+        surfaceOp: 'append',
+        data: {
+          id: 'm1',
+          source: { kind: 'user' },
+          content: [
+            { type: 'text', text: 'see these' },
+            { type: 'file', attachment: { attachmentId: 'sha256:f', name: 'notes.md', bytes: 2048 } },
+            {
+              type: 'image',
+              attachment: {
+                attachmentId: 'sha256:i',
+                mediaType: 'image/png',
+                bytes: 4,
+                width: 4,
+                height: 4,
+                name: 'shot.png',
+              },
+            },
+            { type: 'text', text: `${SIDECHAT_INLINE_CONTEXT_PREFIX}File "notes.md" (2048 bytes):\n\n# Title` },
+            { type: 'text', text: textOnlyImageNote(['shot.png']) },
+          ],
+        },
+      },
+    ]
+    const { container, unmount } = renderRoot(createElement(SideChatView, viewProps(makeCtx(threadStore()))))
+    await act(async () => {})
+    await act(async () => { await Promise.resolve() })
+    const text = container.textContent ?? ''
+    expect(text).toContain('see these')
+    expect(text).toContain('notes.md')
+    expect(text).toContain('2 KB')
+    expect(text).toContain('附件内容')
+    expect(text).toContain('当前模型只接受文本')
+    // The thumbnail was fetched through the attachment route into an object URL.
+    await act(async () => {
+      for (let turn = 0; turn < 8; turn += 1) await Promise.resolve()
+    })
+    const thumb = container.querySelector<HTMLImageElement>('img[src="blob:preview"]')
+    expect(thumb).not.toBeNull()
     unmount()
   })
 })
