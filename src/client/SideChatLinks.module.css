@@ -1,0 +1,219 @@
+/* Side Chat —「关联会话」section: one disclosure header plus a compact list of
+ * counterpart sessions. Visually it must read as a STATUS STRIP above the
+ * transcript (the conversation owns the pane), not as a second conversation:
+ * 12px type, a single hairline, no card chrome, hover tint only on the row the
+ * pointer is over. Every value is a DSW token — the plugin has no exemption
+ * from the skin contract (AGENTS §5). */
+.links {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--dsw-alias-hairline, var(--dsw-alias-border-l1));
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 8px;
+}
+
+.toggle {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-family: inherit;
+  font-size: var(--dsw-font-xxxs-11);
+  line-height: 16px;
+  cursor: pointer;
+}
+
+.toggle:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+.chevron,
+.chevronOpen {
+  flex: none;
+  color: var(--dsw-alias-label-tertiary);
+  transition: transform var(--ds-transition-duration-slow, 120ms) var(--ds-ease-in-out, ease);
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
+
+.headerLabel {
+  white-space: nowrap;
+}
+
+.count {
+  flex: none;
+  min-width: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-3);
+  color: var(--dsw-alias-label-tertiary);
+  font-size: var(--dsw-font-xxxs-11);
+  line-height: 16px;
+  text-align: center;
+}
+
+/* The collapsed empty state sits in the header so "no cross-session messages"
+ * is legible without opening anything. */
+.emptyInline {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: var(--dsw-font-xxxs-11);
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.refresh {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-left: auto;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  cursor: pointer;
+}
+
+.refresh:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 8px 8px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  padding: 4px 6px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.row:hover:not(:disabled) {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+/* A name-only counterpart has no session to open: the row stays readable but
+ * must not pretend to be a link. */
+.row:disabled {
+  cursor: default;
+  opacity: 0.72;
+}
+
+.glyph {
+  flex: none;
+  width: 12px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: var(--dsw-font-xxs-12);
+  line-height: 16px;
+  text-align: center;
+}
+
+.glyph[data-direction='outbound'] {
+  color: var(--dsw-alias-state-business-primary);
+}
+
+.glyph[data-direction='inbound'] {
+  color: var(--dsw-alias-brand-primary);
+}
+
+.rowText {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  gap: 1px;
+}
+
+.title {
+  overflow: hidden;
+  color: var(--dsw-alias-label-primary);
+  font-size: var(--dsw-font-xxs-12);
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: var(--dsw-font-xxxs-11);
+  line-height: 16px;
+}
+
+.dot {
+  color: var(--dsw-alias-label-dimmed, var(--dsw-alias-label-tertiary));
+}
+
+.flag {
+  color: var(--dsw-alias-state-warn-primary);
+}
+
+.empty,
+.dropped,
+.error {
+  margin: 0;
+  padding: 2px 6px;
+  font-size: var(--dsw-font-xxxs-11);
+  line-height: 16px;
+}
+
+.empty,
+.dropped {
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.error {
+  color: var(--dsw-alias-state-error-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron,
+  .chevronOpen {
+    transition: none;
+  }
+}

@@ -46,6 +46,7 @@ import { buildSubagentLiveApi, type SidebarSubagentLiveRoutes } from './subagent
 import { buildTeamsApi, type SidebarTeamsRoutes } from './team-routes.ts'
 import { buildWorkflowsApi, type SidebarWorkflowRoutes } from './workflow-routes.ts'
 import { buildSidechatApi } from './sidechat-routes.ts'
+import { buildLinksApi } from './session-links-routes.ts'
 import { createAssistantLiveBuffer, type AssistantLiveBuffer } from './assistant-live.ts'
 import { readJsonBody, readTextBody, requireString, SidebarError, writeError, writeJson, writeOk } from './wire.ts'
 import { streamFileToResponse } from './file-stream.ts'
@@ -1159,6 +1160,10 @@ function buildApi(
     // ownership), and the thread is created with a CUSTOM seed the stock
     // fork APIs cannot express.
     ...buildSidechatApi(ctx, assistantLive),
+    // Inter-session links: which OTHER sessions this session has exchanged
+    // messages with, in both directions. Derived read-only from the caller's
+    // own stored log (see ./session-links.ts) — no persistence, no polling.
+    ...buildLinksApi(ctx),
   }
 }
 

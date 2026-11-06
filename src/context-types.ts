@@ -501,6 +501,30 @@ export interface SidebarSessionTitleService {
  */
 export interface SidebarSessionPersistenceService {
   open(sessionId: string, access: 'read' | 'write'): Promise<SidebarSessionHandle>
+  /**
+   * Lightweight stored-session observation WITHOUT materialising the log.
+   *
+   * Optional: the host has carried `stat` since the 0.1.7 line, but this
+   * plugin only needs it as an optimization — a derived read-model cache keyed
+   * by {@link SidebarSessionSnapshot.revision} (the host documents `revision`
+   * for exactly that use). Callers must treat an absent method as "no cheap
+   * revision", not as an error.
+   */
+  stat?(sessionId: string): Promise<SidebarSessionSnapshot | undefined>
+}
+
+/**
+ * One stored session's cheap metadata (`sessionPersistence.stat`), as the link
+ * cache consumes it. The header is opaque here: the link fold reads the events,
+ * not the header.
+ */
+export interface SidebarSessionSnapshot {
+  /** Opaque backend change token; equal revisions may be treated as unchanged. */
+  readonly revision: unknown
+  /** Logical event count, when the backend can derive it from metadata. */
+  readonly eventCount?: number
+  /** Physical artifact size, when the backend can derive it from metadata. */
+  readonly sizeBytes?: number
 }
 
 /** One open channel onto a stored session (the fields this plugin reads). */

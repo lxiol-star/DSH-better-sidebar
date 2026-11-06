@@ -18,6 +18,7 @@ import type {
   SidechatPendingInput,
   SidechatThreadInfo,
 } from '../sidechat-core.ts'
+import type { SessionLinksResult } from '../session-links.ts'
 import type {
   SidebarCreateTeamTaskRequest,
   SidebarChildLiveView,
@@ -594,6 +595,18 @@ export const api = {
    */
   workflowsList: (rootSessionId: string, signal?: AbortSignal) =>
     call<WorkflowsListResult>('workflows.list', { rootSessionId }, signal),
+  /**
+   * The inter-session links of one session: every counterpart it exchanged
+   * messages with, both directions, newest first.
+   *
+   * Read-only and derived host-side from THIS session's own stored log (the
+   * delivering `tool/call` rows for outbound, the relayed `user/message`
+   * `source` for inbound — see src/session-links.ts). A session whose log
+   * cannot be read answers an EMPTY edge set; the panel renders that as the
+   * honest "never communicated across sessions" state rather than an error.
+   */
+  linksEdges: (scope: SessionScope, signal?: AbortSignal) =>
+    call<SessionLinksResult>('links.edges', scopePayload(scope, {}), signal),
   /** Create one shared task on the root-led team. */
   teamsTaskCreate: (rootSessionId: string, req: TeamsTaskCreateRequest) =>
     writeTask('teams.taskCreate', { rootSessionId, ...req }),
